@@ -1,0 +1,236 @@
+package com.example.comicviewer
+
+import android.app.DownloadManager
+import android.content.Context.MODE_PRIVATE
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.os.Environment
+import android.util.Log
+import android.util.JsonReader
+import android.widget.ImageView
+import java.io.*
+import java.net.URL
+
+class Filehandler(private val context: Context) {
+
+    fun downloadComic(url: String,fileName: String, filetype: String): Long {
+        var downloadManagervar = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        var Download_Uri = Uri.parse(url)
+        val request = DownloadManager.Request(Download_Uri)
+        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+        request.setAllowedOverRoaming(false)
+        request.setTitle("Comic Viewer Downloading comic " + filetype)
+        request.setDescription("Comic Viewer Downloading comic " + filetype)
+        request.setDestinationInExternalPublicDir(
+            Environment.DIRECTORY_DOWNLOADS,
+            "/ComicViewer/" + "/" + fileName
+        )
+        var refid = downloadManagervar.enqueue(request)
+        return refid;
+    }
+
+    @Throws(IOException::class)
+    fun saveComic(comic: Comic,FILE_NAME: String) {
+        val number = comic.number
+        val title = comic.title
+        val altText = comic.altText
+        val imgPath = comic.imgPath
+        val urlPath = comic.imgUrl
+        val text = "$number \n $title \n $altText \n $urlPath \n $imgPath \n"
+
+        var fos: FileOutputStream? = null
+
+        try {
+            Log.d("Saver", "Saver starting with data")
+            fos = context.openFileOutput(FILE_NAME, MODE_PRIVATE)
+            fos!!.write(text.toByteArray())
+            fos.close()
+
+            Log.d("saver", "Saved to " + context.getFileStreamPath(FILE_NAME))
+
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    @Throws(IOException::class)
+    fun saveImage(bitmap: Bitmap,FILE_NAME: String): String {
+        var fos: FileOutputStream? = null
+
+        try {
+            fos = context.openFileOutput(FILE_NAME.trim(), MODE_PRIVATE)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos)
+            fos.close()
+            Log.d("saver", "Saved to " + context.getFileStreamPath(FILE_NAME).absolutePath)
+
+            return context.getFileStreamPath(FILE_NAME).path
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        return ""
+    }
+
+    @Throws(IOException::class)
+    fun loadComic(FILE_NAME: String): Comic {
+        var fis: FileInputStream? = null
+
+        try {
+            fis = context.openFileInput(FILE_NAME)
+            val isr = InputStreamReader(fis)
+            val br = BufferedReader(isr)
+            val sb = StringBuilder()
+
+            var number    = -1
+            var title     = ""
+            var altText   = ""
+            var imgPath   = ""
+            var urlPath   = ""
+
+            var text = br.readLine()
+            if(text != null) {
+                number = text.trim().toInt()
+                Log.d("loader", "number: "+number.toString())
+            }
+
+            text = br.readLine()
+            if(text != null) {
+                Log.d("loader", "title: "+text)
+                title = sb.append(text).toString()
+                sb.clear()
+            }
+
+            text = br.readLine()
+            if(text != null) {
+                Log.d("loader", "altText: "+text)
+                altText = sb.append(text).toString()
+                sb.clear()
+            }
+
+            text = br.readLine()
+            if(text != null) {
+                Log.d("loader", "urlPath: "+text)
+                urlPath = sb.append(text).toString()
+                sb.clear()
+            }
+
+            text = br.readLine()
+            if(text != null) {
+                Log.d("loader", "imgPath: "+text)
+                imgPath = sb.append(text).toString()
+                sb.clear()
+            }
+
+            var comic = Comic(number,title,altText,urlPath,imgPath)
+            return comic;
+
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        return Comic(-1,"Could Not Load","Could Not Load","","")
+    }
+
+    @Throws(IOException::class)
+    fun savelist(comiclist: List<Int>,FILE_NAME: String){
+        var text = ""
+        for (x in comiclist){
+            text = text + x + " \n "
+        }
+
+        var fos: FileOutputStream? = null
+        try {
+            Log.d("Saver", "Saver starting with comiclist")
+            fos = context.openFileOutput(FILE_NAME, MODE_PRIVATE)
+            fos!!.write(text.toByteArray())
+            fos.close()
+            Log.d("saver", "Saved to " + context.getFileStreamPath(FILE_NAME))
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    @Throws(IOException::class)
+    fun loadlist(FILE_NAME: String): MutableList<Int> {
+        var fis: FileInputStream? = null
+        var comiclist = mutableListOf<Int>()
+
+        try {
+            fis = context.openFileInput(FILE_NAME)
+            val isr = InputStreamReader(fis)
+            val br = BufferedReader(isr)
+            br.useLines { lines -> lines.forEach { it.toIntOrNull()?.let { it1 -> comiclist.add(it1) } } }
+            Log.d("loader", "loaded list of size: " + comiclist.size.toString())
+
+            return comiclist;
+
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        return mutableListOf<Int>()
+    }
+
+    @Throws(IOException::class)
+    fun loadJson(FILE_NAME: String): Comic{
+        var fis: FileInputStream? = null
+        fis = context.openFileInput(FILE_NAME)
+        val reader = JsonReader(InputStreamReader(fis, "UTF-8"))
+        try {
+            var number    = -1
+            var title     = ""
+            var altText   = ""
+            var imgPath   = ""
+            var urlPath   = ""
+
+            reader.beginObject()
+            while (reader.hasNext()) {
+                val name = reader.nextName()
+                if (name == "img") {
+                    urlPath = reader.nextString()
+                } else if (name == "alt") {
+                    altText = reader.nextString()
+                } else if (name == "num") {
+                    number = reader.nextInt()
+                } else if (name == "title") {
+                    title = reader.nextString()
+                } else {
+                    reader.skipValue()
+                }
+            }
+            reader.endObject()
+            return Comic(number,title,altText,imgPath,urlPath)
+        } finally {
+            reader.close()
+        }
+    }
+}
