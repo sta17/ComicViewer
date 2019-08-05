@@ -21,13 +21,12 @@ import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.core.graphics.drawable.toDrawable
 
-
+// https://github.com/shortcut/android-coding-assignment - task
 // https://xkcd.com/json.html - format
 // https://xkcd.com/614/info.0.json - specific comic
 // https://xkcd.com/info.0.json - current
 // https://xkcd.com/2165/ - actual comic
-// https://github.com/shortcut/android-coding-assignment - task
-// https://www.youtube.com/watch?v=FBQnMfSyD98&list=PLt72zDbwBnAV-5HxCmVTP80iKNJ88e10b - tutorial
+// https://www.youtube.com/watch?v=FBQnMfSyD98&list=PLt72zDbwBnAV-5HxCmVTP80iKNJ88e10b - tutorial series for backup
 // http://www.gadgetsaint.com/android/download-manager/ - download manager code
 class MainActivity : AppCompatActivity() {
 
