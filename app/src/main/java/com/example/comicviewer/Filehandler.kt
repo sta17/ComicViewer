@@ -1,6 +1,7 @@
 package com.example.comicviewer
 
 import android.app.DownloadManager
+import android.app.PendingIntent.getActivity
 import android.content.Context.MODE_PRIVATE
 import android.content.Context
 import android.graphics.Bitmap
@@ -12,21 +13,30 @@ import android.util.JsonReader
 import android.widget.ImageView
 import java.io.*
 import java.net.URL
+import android.content.Context.MODE_PRIVATE
+import javax.xml.transform.stream.StreamResult
+import java.io.File.separator
+import java.util.logging.Logger.global
+
 
 class Filehandler(private val context: Context) {
 
     fun downloadComic(url: String,fileName: String, filetype: String): Long {
+        Log.d("download", "download file name: " + fileName)
         var downloadManagervar = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         var Download_Uri = Uri.parse(url)
+        Log.d("download", "download url: " + Download_Uri.toString())
         val request = DownloadManager.Request(Download_Uri)
         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
         request.setAllowedOverRoaming(false)
         request.setTitle("Comic Viewer Downloading comic " + filetype)
         request.setDescription("Comic Viewer Downloading comic " + filetype)
-        request.setDestinationInExternalPublicDir(
-            Environment.DIRECTORY_DOWNLOADS,
-            "/ComicViewer/" + "/" + fileName
-        )
+        request.setDestinationInExternalFilesDir(context,Environment.DIRECTORY_DOWNLOADS,"/ComicViewer/" + fileName)
+        //request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,"/ComicViewer/" + fileName)
+
+        //    Environment.DIRECTORY_DOWNLOADS,
+        //    "/ComicViewer/" + fileName
+        //)
         var refid = downloadManagervar.enqueue(request)
         return refid;
     }
@@ -44,7 +54,7 @@ class Filehandler(private val context: Context) {
 
         try {
             Log.d("Saver", "Saver starting with data")
-            fos = context.openFileOutput(FILE_NAME, MODE_PRIVATE)
+            fos = context.openFileOutput(FILE_NAME+".txt", MODE_PRIVATE)
             fos!!.write(text.toByteArray())
             fos.close()
 
@@ -202,8 +212,16 @@ class Filehandler(private val context: Context) {
 
     @Throws(IOException::class)
     fun loadJson(FILE_NAME: String): Comic{
-        var fis: FileInputStream? = null
-        fis = context.openFileInput(FILE_NAME)
+        //var fis: FileInputStream? = null
+
+        //val fis = FileInputStream(context.getDir( "/ComicViewer/" + FILE_NAME,0))
+
+        val fis = FileInputStream(File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + FILE_NAME))
+
+        //val XmlFile = getActivity().openFileInput(FILE_NAME)
+        //val result = StreamResult(getActivity().openFileOutput(FILE_NAME,getActivity().MODE_PRIVATE))
+        //fis = context.openFileInput(Environment.DIRECTORY_DOWNLOADS + "/ComicViewer/" + FILE_NAME)
+
         val reader = JsonReader(InputStreamReader(fis, "UTF-8"))
         try {
             var number    = -1
@@ -228,7 +246,7 @@ class Filehandler(private val context: Context) {
                 }
             }
             reader.endObject()
-            return Comic(number,title,altText,imgPath,urlPath)
+            return Comic(number,title,altText,urlPath,imgPath)
         } finally {
             reader.close()
         }

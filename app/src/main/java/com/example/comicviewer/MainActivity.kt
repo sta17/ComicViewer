@@ -1,5 +1,6 @@
 package com.example.comicviewer
 
+import android.Manifest
 import android.app.DownloadManager
 import android.content.Context
 import android.os.Bundle
@@ -20,6 +21,14 @@ import android.content.IntentFilter
 import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.core.graphics.drawable.toDrawable
+import android.Manifest.permission
+import android.Manifest.permission.READ_PHONE_STATE
+import androidx.core.app.ActivityCompat
+import android.content.pm.PackageManager
+import android.os.Environment
+import androidx.core.content.ContextCompat
+
+
 
 // https://github.com/shortcut/android-coding-assignment - task
 // https://xkcd.com/json.html - format
@@ -36,6 +45,11 @@ class MainActivity : AppCompatActivity() {
 
     private var comiclist = mutableListOf<Int>()
     private var refidlist: ArrayList<Long> = ArrayList()
+
+    private var img_refidlist: MutableMap<Long, Int> = mutableMapOf()
+    private var json_refidlist: MutableMap<Long, Int> = mutableMapOf()
+
+    private val MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 1
 
     var SHARED_PREFS = "Stevens Comic Viewer"
 
@@ -78,24 +92,38 @@ class MainActivity : AppCompatActivity() {
             val referenceId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
             refidlist.remove(referenceId)
 
-            /*
-            check if image or json file.
+            if(json_refidlist.contains(referenceId)){
+                val toGet = json_refidlist[referenceId]
+                json_refidlist.remove(referenceId)
 
-            if json:
+                Log.d("getComic", "comic json aquired: " + toGet.toString())
 
-            do loadJson to tempComic
-            save tempComic as txt
-            do updateComic(tempComic)
+                var currentComic = Filehandler(applicationContext).loadJson(toGet.toString() + ".json")
+                val imageUrl = currentComic.imgUrl
+                Filehandler(applicationContext).saveComic(currentComic,toGet.toString())
 
-            else if image:
-            load image and update the screen if current.
+                Log.d("getComic", "img path provided: " + currentComic.imgPath)
+                Log.d("getComic", "img url provided: " + currentComic.imgUrl)
 
-            else:
-            updateComic(getComic(currentComicNumber))
+                val refid_IMG = Filehandler(applicationContext).downloadComic(imageUrl,toGet.toString() + ".png","png")
+                refidlist.add(refid_IMG);
+                if (toGet != null) {
+                    img_refidlist.put(refid_IMG,toGet)
+                }
 
-             */
-
-            updateComic(getComic(currentComicNumber))
+            }else if(img_refidlist.contains(referenceId)){
+                val toGet = img_refidlist[referenceId]
+                img_refidlist.remove(referenceId)
+                Log.d("getComic", "comic image aquired: " + toGet.toString())
+                if (toGet != null) {
+                    currentComicNumber = toGet.toInt()
+                }
+                comiclist.add(currentComicNumber)
+                var currentComic = Filehandler(applicationContext).loadJson(toGet.toString() + ".json")
+                currentComic.imgPath = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + toGet.toString() + ".png").absolutePath
+                Filehandler(applicationContext).saveComic(currentComic,toGet.toString())
+                updateComic(getComic(currentComicNumber))
+            }
         }
     }
 
@@ -109,6 +137,33 @@ class MainActivity : AppCompatActivity() {
         savePrefs()
         Filehandler(applicationContext).savelist(comiclist,"comiclist.txt")
     }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        Log.d("permission", "onRequestPermissionsResult started")
+        when (requestCode) {
+            MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    Log.d("permission", "permission granted")
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    Log.d("permission", "permission denied")
+                }
+                return
+            }
+
+            // Add other 'when' lines to check for other
+            // permissions this app might request.
+            else -> {
+                // Ignore all other requests.
+            }
+        }
+    }
+
 
     fun getComic(toGet: Int): Comic {
         // TODO:
@@ -129,8 +184,21 @@ class MainActivity : AppCompatActivity() {
             lastViewedComic = currentComicNumber
             return Filehandler(applicationContext).loadComic(toGet.toString()+".txt")
         } else {
-            val refid = Filehandler(applicationContext).downloadComic("https://xkcd.com/" + toGet.toString() +"/info.0.json",toGet.toString() + ".json","txt")
-            refidlist.add(refid);
+            val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
+            if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE
+                )
+            } else {
+                //TODO
+            }
+
+            val refid_TXT = Filehandler(applicationContext).downloadComic("https://xkcd.com/" + toGet.toString() +"/info.0.json",toGet.toString() + ".json","txt")
+            refidlist.add(refid_TXT);
+            json_refidlist.put(refid_TXT,toGet);
         }
 
         return Comic(toGet,"Unknown","Comic "+toGet.toString()+" Not Available.","","")
@@ -158,7 +226,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun updateComic(comic: Comic){
-        d("update_comic",comic.imgPath)
         displayAlt.setText(comic.altText)
         displayTitle.setText(comic.title)
 
@@ -172,7 +239,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @JvmOverloads fun generatePath(latest: Boolean, number: Int): String {
+    fun generatePath(latest: Boolean, number: Int): String {
         if(latest == true){
             return "https://xkcd.com/info.0.json"
         }else{
