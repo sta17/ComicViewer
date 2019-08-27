@@ -1,22 +1,13 @@
 package com.example.comicviewer
 
 import android.app.DownloadManager
-import android.app.PendingIntent.getActivity
 import android.content.Context.MODE_PRIVATE
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import android.util.JsonReader
-import android.widget.ImageView
 import java.io.*
-import java.net.URL
-import android.content.Context.MODE_PRIVATE
-import javax.xml.transform.stream.StreamResult
-import java.io.File.separator
-import java.util.logging.Logger.global
 
 
 class Filehandler(private val context: Context) {
@@ -69,94 +60,6 @@ class Filehandler(private val context: Context) {
                 }
             }
         }
-    }
-
-    @Throws(IOException::class)
-    fun saveImage(bitmap: Bitmap,FILE_NAME: String): String {
-        var fos: FileOutputStream? = null
-
-        try {
-            fos = context.openFileOutput(FILE_NAME.trim(), MODE_PRIVATE)
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos)
-            fos.close()
-            Log.d("saver", "Saved to " + context.getFileStreamPath(FILE_NAME).absolutePath)
-
-            return context.getFileStreamPath(FILE_NAME).path
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-            }
-        }
-        return ""
-    }
-
-    @Throws(IOException::class)
-    fun loadComic(FILE_NAME: String): Comic {
-        var fis: FileInputStream? = null
-
-        try {
-            fis = context.openFileInput(FILE_NAME)
-            val isr = InputStreamReader(fis)
-            val br = BufferedReader(isr)
-            val sb = StringBuilder()
-
-            var number    = -1
-            var title     = ""
-            var altText   = ""
-            var imgPath   = ""
-            var urlPath   = ""
-
-            var text = br.readLine()
-            if(text != null) {
-                number = text.trim().toInt()
-                Log.d("loader", "number: "+number.toString())
-            }
-
-            text = br.readLine()
-            if(text != null) {
-                Log.d("loader", "title: "+text)
-                title = sb.append(text).toString()
-                sb.clear()
-            }
-
-            text = br.readLine()
-            if(text != null) {
-                Log.d("loader", "altText: "+text)
-                altText = sb.append(text).toString()
-                sb.clear()
-            }
-
-            text = br.readLine()
-            if(text != null) {
-                Log.d("loader", "urlPath: "+text)
-                urlPath = sb.append(text).toString()
-                sb.clear()
-            }
-
-            text = br.readLine()
-            if(text != null) {
-                Log.d("loader", "imgPath: "+text)
-                imgPath = sb.append(text).toString()
-                sb.clear()
-            }
-
-            var comic = Comic(number,title,altText,urlPath,imgPath)
-            return comic;
-
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-            }
-        }
-        return Comic(-1,"Could Not Load","Could Not Load","","")
     }
 
     @Throws(IOException::class)

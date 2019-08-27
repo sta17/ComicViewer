@@ -18,11 +18,8 @@ import java.io.FileInputStream
 import android.content.Intent
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
-import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.core.graphics.drawable.toDrawable
-import android.Manifest.permission
-import android.Manifest.permission.READ_PHONE_STATE
 import androidx.core.app.ActivityCompat
 import android.content.pm.PackageManager
 import android.os.Environment
@@ -35,8 +32,6 @@ import androidx.core.content.ContextCompat
 // https://xkcd.com/614/info.0.json - specific comic
 // https://xkcd.com/info.0.json - current
 // https://xkcd.com/2165/ - actual comic
-// https://www.youtube.com/watch?v=FBQnMfSyD98&list=PLt72zDbwBnAV-5HxCmVTP80iKNJ88e10b - tutorial series for backup
-// http://www.gadgetsaint.com/android/download-manager/ - download manager code
 class MainActivity : AppCompatActivity() {
 
     private var latestComicNumber = 2167
@@ -61,8 +56,7 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(onComplete,  IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
         //Setup
-        saveForSetup()
-        loadPrefs()
+        //loadPrefs()
 
         comiclist = comiclist.union(Filehandler(applicationContext).loadlist("comiclist.txt")).toMutableList()
 
@@ -98,12 +92,12 @@ class MainActivity : AppCompatActivity() {
 
                 Log.d("getComic", "comic json aquired: " + toGet.toString())
 
-                var currentComic = Filehandler(applicationContext).loadJson(toGet.toString() + ".json")
-                val imageUrl = currentComic.imgUrl
-                Filehandler(applicationContext).saveComic(currentComic,toGet.toString())
+                var downloadedComic = Filehandler(applicationContext).loadJson(toGet.toString() + ".json")
+                val imageUrl = downloadedComic.imgUrl
+                Filehandler(applicationContext).saveComic(downloadedComic,toGet.toString())
 
-                Log.d("getComic", "img path provided: " + currentComic.imgPath)
-                Log.d("getComic", "img url provided: " + currentComic.imgUrl)
+                Log.d("getComic", "img path provided: " + downloadedComic.imgPath)
+                Log.d("getComic", "img url provided: " + downloadedComic.imgUrl)
 
                 val refid_IMG = Filehandler(applicationContext).downloadComic(imageUrl,toGet.toString() + ".png","png")
                 refidlist.add(refid_IMG);
@@ -119,9 +113,11 @@ class MainActivity : AppCompatActivity() {
                     currentComicNumber = toGet.toInt()
                 }
                 comiclist.add(currentComicNumber)
-                var currentComic = Filehandler(applicationContext).loadJson(toGet.toString() + ".json")
-                currentComic.imgPath = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + toGet.toString() + ".png").absolutePath
-                Filehandler(applicationContext).saveComic(currentComic,toGet.toString())
+                var downloadedComic = Filehandler(applicationContext).loadJson(toGet.toString() + ".json")
+                downloadedComic.imgPath = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + toGet.toString() + ".png").absolutePath
+                Log.d("getComic", "comic image path: " + downloadedComic.imgPath)
+                Filehandler(applicationContext).saveComic(downloadedComic,toGet.toString())
+
                 updateComic(getComic(currentComicNumber))
             }
         }
@@ -166,14 +162,6 @@ class MainActivity : AppCompatActivity() {
 
 
     fun getComic(toGet: Int): Comic {
-        // TODO:
-        //  check if comic exist locally,
-        //  if yes, fetch,
-        //  if not, download
-
-        // saving and loading internally
-        // https://www.youtube.com/watch?v=EcfUkjlL9RI
-
         // convert to list checker, if in list attempt to load, if found, then send comic further along. if download accurs then add to list.
 
         Log.d("getComic", "comic number: " + toGet.toString())
@@ -182,7 +170,7 @@ class MainActivity : AppCompatActivity() {
         if (toGet in comiclist){
             currentComicNumber = toGet
             lastViewedComic = currentComicNumber
-            return Filehandler(applicationContext).loadComic(toGet.toString()+".txt")
+            return Filehandler(applicationContext).loadJson(toGet.toString()+".json")
         } else {
             val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
@@ -232,39 +220,11 @@ class MainActivity : AppCompatActivity() {
         d("update_comic",comic.imgPath)
         val displayImage = findViewById<ImageView>(R.id.displayImage)
 
-        if (comic.imgPath.trim().length != 0){
-                displayImage.setImageBitmap(BitmapFactory.decodeStream(FileInputStream(File(comic.imgPath.trim()))))
-        } else {
+        val file = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + comic.number.toString() + ".png")
+        if(file.exists())
+            displayImage.setImageBitmap(BitmapFactory.decodeStream(FileInputStream(File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + comic.number.toString() + ".png").absolutePath)))
+        else
             displayImage.setImageDrawable(R.drawable.ic_launcher_foreground.toDrawable())
-        }
-    }
-
-    fun generatePath(latest: Boolean, number: Int): String {
-        if(latest == true){
-            return "https://xkcd.com/info.0.json"
-        }else{
-            return "https://xkcd.com/" + number + "/info.0.json"
-        }
-    }
-
-    fun saveForSetup(){
-        savePrefs()
-        var path = ""
-
-        val millennials = BitmapFactory.decodeResource(this.getResources(), R.drawable.millennials)
-        path = Filehandler(applicationContext).saveImage(millennials,"2165.jpg")
-        Filehandler(applicationContext).saveComic(Comic(2165, "Millennials", "Ironically, I've been having these same arguments for at least a decade now. I thought we would have moved on by now, but somehow the snide complaints about millennials continue.","https://imgs.xkcd.com/comics/millennials.png", path),"2165.txt")
-        comiclist.add(2165)
-
-        val stack = BitmapFactory.decodeResource(this.getResources(), R.drawable.stack)
-        path = Filehandler(applicationContext).saveImage(stack,"2166.jpg")
-        Filehandler(applicationContext).saveComic(Comic(2166, "Stack","Gotta feel kind of bad for nation-state hackers who spend years implanting and cultivating some hardware exploit, only to discover the entire target database is already exposed to anyone with a web browser.","https://imgs.xkcd.com/comics/stack.png",path),"2166.txt")
-        comiclist.add(2166)
-
-        val motivated_reasoning_olympics = BitmapFactory.decodeResource(this.getResources(), R.drawable.motivated_reasoning_olympics)
-        path = Filehandler(applicationContext).saveImage(motivated_reasoning_olympics,"2167.jpg")
-        Filehandler(applicationContext).saveComic(Comic(2167, "Motivated Reasoning Olympics", "[later] I can't believe how bad corruption has become, especially given that our league split off from the statewide one a month ago SPECIFICALLY to protest this kind of flagrantly biased judging.","https://imgs.xkcd.com/comics/motivated_reasoning_olympics.png", path),"2167.txt")
-        comiclist.add(2167)
     }
 
     fun legalnumber(number: Int): Boolean {
