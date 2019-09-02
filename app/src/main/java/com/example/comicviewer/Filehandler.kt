@@ -12,7 +12,7 @@ import java.io.*
 
 class Filehandler(private val context: Context) {
 
-    fun downloadComic(url: String,fileName: String, filetype: String): Long {
+    fun download(url: String, fileName: String, filetype: String): Long {
         Log.d("download", "download file name: " + fileName)
         var downloadManagervar = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         var Download_Uri = Uri.parse(url)

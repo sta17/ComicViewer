@@ -12,7 +12,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import android.graphics.BitmapFactory
 import android.widget.ImageView
-import java.net.URL
 import java.io.File
 import java.io.FileInputStream
 import android.content.Intent
@@ -26,17 +25,17 @@ import android.os.Environment
 import androidx.core.content.ContextCompat
 
 
-
 // https://github.com/shortcut/android-coding-assignment - task
 // https://xkcd.com/json.html - format
 // https://xkcd.com/614/info.0.json - specific comic
 // https://xkcd.com/info.0.json - current
 // https://xkcd.com/2165/ - actual comic
+
+//TODO: Fix the latest comic thing, the need to check for latest number and to update it.
 class MainActivity : AppCompatActivity() {
 
-    private var latestComicNumber = 2167
-    private var lastViewedComic = 2166
-    private var currentComicNumber = 2166
+    private var latestComicNumber = 0
+    private var currentComicNumber = 0
 
     private var comiclist = mutableListOf<Int>()
     private var refidlist: ArrayList<Long> = ArrayList()
@@ -56,25 +55,29 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(onComplete,  IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
         //Setup
-        //loadPrefs()
+        loadPrefs()
 
-        comiclist = comiclist.union(Filehandler(applicationContext).loadlist("comiclist.txt")).toMutableList()
+        buttonFirst.setOnClickListener{
+            getComic(1)
+        }
 
-        updateComic(getComic(lastViewedComic))
+        buttonLast.setOnClickListener{
+            getComic(0)
+        }
 
         buttonUpdate.setOnClickListener{
-            updateComic(getComic(currentComicNumber))
+            getComic(currentComicNumber)
         }
 
         buttonNext.setOnClickListener{
             if(legalnumber(currentComicNumber+1)) {
-                updateComic(getComic(currentComicNumber+1))
+                getComic(currentComicNumber+1)
             }
         }
 
         buttonPrevious.setOnClickListener{
             if(legalnumber(currentComicNumber-1)) {
-                updateComic(getComic(currentComicNumber-1))
+                getComic(currentComicNumber-1)
             }
         }
 
@@ -87,38 +90,59 @@ class MainActivity : AppCompatActivity() {
             refidlist.remove(referenceId)
 
             if(json_refidlist.contains(referenceId)){
-                val toGet = json_refidlist[referenceId]
+                var toGet = json_refidlist[referenceId]
                 json_refidlist.remove(referenceId)
+                lateinit var downloadedComic:Comic
 
-                Log.d("getComic", "comic json aquired: " + toGet.toString())
+                if(toGet == 0) {
+                    Log.d("onComplete", "latest comic json aquired")
+                    downloadedComic = Filehandler(applicationContext).loadJson("latest.json")
+                    toGet = downloadedComic.number
+                    latestComicNumber = downloadedComic.number
 
-                var downloadedComic = Filehandler(applicationContext).loadJson(toGet.toString() + ".json")
+                    val from = File(applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/latest.json")
+                    val to = File(applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + toGet.toString() + ".json")
+
+                    if (from.exists())
+                        from.renameTo(to)
+
+                } else {
+                    Log.d("onComplete", "comic json aquired: " + toGet.toString())
+                    downloadedComic = Filehandler(applicationContext).loadJson(toGet.toString() + ".json")
+                }
+
                 val imageUrl = downloadedComic.imgUrl
-                Filehandler(applicationContext).saveComic(downloadedComic,toGet.toString())
+                //Filehandler(applicationContext).saveComic(downloadedComic,toGet.toString())
 
-                Log.d("getComic", "img path provided: " + downloadedComic.imgPath)
-                Log.d("getComic", "img url provided: " + downloadedComic.imgUrl)
+                Log.d("onComplete", "img path provided: " + downloadedComic.imgPath)
+                Log.d("onComplete", "img url provided: " + downloadedComic.imgUrl)
 
-                val refid_IMG = Filehandler(applicationContext).downloadComic(imageUrl,toGet.toString() + ".png","png")
-                refidlist.add(refid_IMG);
-                if (toGet != null) {
-                    img_refidlist.put(refid_IMG,toGet)
+                if(!File(applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + toGet.toString() + ".png").exists()){
+                    val refid_IMG = Filehandler(applicationContext).download(imageUrl,toGet.toString() + ".png","png")
+                    refidlist.add(refid_IMG);
+                    if (toGet != null) {
+                        img_refidlist.put(refid_IMG,toGet)
+                    }
                 }
 
             }else if(img_refidlist.contains(referenceId)){
-                val toGet = img_refidlist[referenceId]
+                var toGet = img_refidlist[referenceId]
+                if (toGet != null) {
+                    toGet = toGet.toInt()
+                }
                 img_refidlist.remove(referenceId)
                 Log.d("getComic", "comic image aquired: " + toGet.toString())
-                if (toGet != null) {
-                    currentComicNumber = toGet.toInt()
-                }
-                comiclist.add(currentComicNumber)
+
+                currentComicNumber = toGet!!
+                comiclist.add(toGet)
+
+                // FIX THE IN SYSTEM PATH FOR IMAGE
                 var downloadedComic = Filehandler(applicationContext).loadJson(toGet.toString() + ".json")
                 downloadedComic.imgPath = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + toGet.toString() + ".png").absolutePath
-                Log.d("getComic", "comic image path: " + downloadedComic.imgPath)
                 Filehandler(applicationContext).saveComic(downloadedComic,toGet.toString())
+                Log.d("onComplete", "comic image path: " + downloadedComic.imgPath)
 
-                updateComic(getComic(currentComicNumber))
+                updateComic(toGet)
             }
         }
     }
@@ -126,6 +150,8 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(onComplete)
+        savePrefs()
+        Filehandler(applicationContext).savelist(comiclist,"comiclist.txt")
     }
 
     override fun onStop() {
@@ -161,17 +187,17 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun getComic(toGet: Int): Comic {
-        // convert to list checker, if in list attempt to load, if found, then send comic further along. if download accurs then add to list.
-
+    fun getComic(toGet: Int): Boolean {
         Log.d("getComic", "comic number: " + toGet.toString())
         Log.d("getComic", "list content: " + comiclist.toString())
 
-        if (toGet in comiclist){
+        if ((toGet in comiclist) && !(toGet == 0)){
             currentComicNumber = toGet
-            lastViewedComic = currentComicNumber
-            return Filehandler(applicationContext).loadJson(toGet.toString()+".json")
+            Log.d("getComic", "comic in list")
+            updateComic(toGet)
+            return true
         } else {
+            Log.d("getComic", "comic not in list")
             val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
             if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
@@ -184,23 +210,51 @@ class MainActivity : AppCompatActivity() {
                 //TODO
             }
 
-            val refid_TXT = Filehandler(applicationContext).downloadComic("https://xkcd.com/" + toGet.toString() +"/info.0.json",toGet.toString() + ".json","txt")
-            refidlist.add(refid_TXT);
-            json_refidlist.put(refid_TXT,toGet);
+            if(toGet == 0){
+                var refid_TXT = Filehandler(applicationContext).download("https://xkcd.com/info.0.json","latest.json","txt")
+                refidlist.add(refid_TXT);
+                json_refidlist.put(refid_TXT,toGet);
+                Log.d("getComic", "getting latest")
+                return false
+            }else {
+                if(!File(applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + toGet.toString() + ".json").exists()){
+                    var refid_TXT = Filehandler(applicationContext).download("https://xkcd.com/" + toGet.toString() +"/info.0.json",toGet.toString() + ".json","txt")
+                    refidlist.add(refid_TXT);
+                    json_refidlist.put(refid_TXT,toGet);
+                    Log.d("getComic", "getting comic: "+toGet.toString())
+                    return false
+                } else if(!File(applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + toGet.toString() + ".png").exists()) {
+                    var refid_IMG = Filehandler(applicationContext).download(Filehandler(applicationContext).loadJson(toGet.toString() + ".json").imgUrl,toGet.toString() + ".png","png")
+                    refidlist.add(refid_IMG);
+                    img_refidlist.put(refid_IMG,toGet);
+                    Log.d("getComic", "getting image: "+toGet.toString())
+                    return false
+                } else {
+                    comiclist.add(toGet)
+                    Log.d("getComic", "updated comiclist")
+                    Log.d("getComic", "list content: " + comiclist.toString())
+                    updateComic(toGet)
+                    return true
+                }
+            }
         }
-
-        return Comic(toGet,"Unknown","Comic "+toGet.toString()+" Not Available.","","")
+        Log.d("getComic", "get comic error")
+        return false
     }
 
     fun loadPrefs() {
         val prefs =  getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE)
-        if (prefs.getBoolean(SHARED_PREFS, true)) {
+        if((prefs.contains("initialized")) && (prefs.getBoolean("initialized",false) == true)){
             latestComicNumber = prefs.getInt("latestComicNumber",latestComicNumber)
-            lastViewedComic = prefs.getInt("lastViewedComic",lastViewedComic)
+            currentComicNumber = prefs.getInt("currentComicNumber",currentComicNumber)
+            comiclist = comiclist.union(Filehandler(applicationContext).loadlist("comiclist.txt")).toMutableList()
             Toast.makeText(this,"Preferences Loaded",Toast.LENGTH_SHORT).show()
+            getComic(currentComicNumber)
         } else {
-            latestComicNumber = 2167
-            lastViewedComic = 2166
+            latestComicNumber = 2
+            currentComicNumber = 1
+            getComic(1)
+            Toast.makeText(this,"New App Set up",Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -208,21 +262,26 @@ class MainActivity : AppCompatActivity() {
         val prefs =  getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE)
         var editor = prefs.edit()
         editor.putInt("latestComicNumber",latestComicNumber)
-        editor.putInt("lastViewedComic",lastViewedComic)
+        editor.putInt("currentComicNumber",currentComicNumber)
+        editor.putBoolean("initialized", false);
         editor.commit()
         //Toast.makeText(this,"Preferences Saved",Toast.LENGTH_SHORT).show()
     }
 
-    fun updateComic(comic: Comic){
-        displayAlt.setText(comic.altText)
-        displayTitle.setText(comic.title)
+    fun updateComic(number: Int){
+        if(File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + number.toString() + ".json").exists()){
+            var comic: Comic = Filehandler(applicationContext).loadJson(number.toString() + ".json")
+            displayAlt.setText(comic.altText)
+            displayTitle.setText(comic.title)
+            d("update_comic",comic.imgPath)
+        } else {
+            displayAlt.setText(" Comic Not Found")
+            displayTitle.setText("Unknown")
+        }
 
-        d("update_comic",comic.imgPath)
         val displayImage = findViewById<ImageView>(R.id.displayImage)
-
-        val file = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + comic.number.toString() + ".png")
-        if(file.exists())
-            displayImage.setImageBitmap(BitmapFactory.decodeStream(FileInputStream(File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + comic.number.toString() + ".png").absolutePath)))
+        if(File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + number.toString() + ".png").exists())
+            displayImage.setImageBitmap(BitmapFactory.decodeStream(FileInputStream(File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + number.toString() + ".png").absolutePath)))
         else
             displayImage.setImageDrawable(R.drawable.ic_launcher_foreground.toDrawable())
     }
