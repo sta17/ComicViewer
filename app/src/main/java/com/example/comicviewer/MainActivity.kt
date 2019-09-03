@@ -44,6 +44,8 @@ class MainActivity : AppCompatActivity() {
     private var json_refidlist: MutableMap<Long, Int> = mutableMapOf()
 
     private val MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 1
+    private val MY_PERMISSIONS_READ_EXTERNAL_STORAGE = 1
+    private val MY_PERMISSIONS_INTERNET = 1
 
     var SHARED_PREFS = "Stevens Comic Viewer"
 
@@ -103,8 +105,19 @@ class MainActivity : AppCompatActivity() {
                     val from = File(applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/latest.json")
                     val to = File(applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + toGet.toString() + ".json")
 
-                    if (from.exists())
+                    if ((from.exists()) && (!to.exists())){
                         from.renameTo(to)
+                    } else {
+                        latestComicNumber = toGet
+                        currentComicNumber = toGet
+                        if(!(toGet in comiclist)){
+                            comiclist.add(toGet)
+                        }
+                        Log.d("onComplete", "comic number: " + toGet.toString())
+                        Log.d("onComplete", "list content: " + comiclist.toString())
+                        updateComic(toGet)
+                        return
+                    }
 
                 } else {
                     Log.d("onComplete", "comic json aquired: " + toGet.toString())
@@ -112,7 +125,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 val imageUrl = downloadedComic.imgUrl
-                //Filehandler(applicationContext).saveComic(downloadedComic,toGet.toString())
 
                 Log.d("onComplete", "img path provided: " + downloadedComic.imgPath)
                 Log.d("onComplete", "img url provided: " + downloadedComic.imgUrl)
@@ -136,12 +148,6 @@ class MainActivity : AppCompatActivity() {
                 currentComicNumber = toGet!!
                 comiclist.add(toGet)
 
-                // FIX THE IN SYSTEM PATH FOR IMAGE
-                var downloadedComic = Filehandler(applicationContext).loadJson(toGet.toString() + ".json")
-                downloadedComic.imgPath = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + toGet.toString() + ".png").absolutePath
-                Filehandler(applicationContext).saveComic(downloadedComic,toGet.toString())
-                Log.d("onComplete", "comic image path: " + downloadedComic.imgPath)
-
                 updateComic(toGet)
             }
         }
@@ -151,13 +157,13 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         unregisterReceiver(onComplete)
         savePrefs()
-        Filehandler(applicationContext).savelist(comiclist,"comiclist.txt")
+        Filehandler(applicationContext).savelist(comiclist,"comiclist.json")
     }
 
     override fun onStop() {
         super.onStop()
         savePrefs()
-        Filehandler(applicationContext).savelist(comiclist,"comiclist.txt")
+        Filehandler(applicationContext).savelist(comiclist,"comiclist.json")
     }
 
     override fun onRequestPermissionsResult(requestCode: Int,
@@ -169,11 +175,37 @@ class MainActivity : AppCompatActivity() {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
-                    Log.d("permission", "permission granted")
+                    Log.d("permission", "write permission granted")
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-                    Log.d("permission", "permission denied")
+                    Log.d("permission", "write permission denied")
+                }
+                return
+            }
+            MY_PERMISSIONS_READ_EXTERNAL_STORAGE -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    Log.d("permission", "read permission granted")
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    Log.d("permission", "read permission denied")
+                }
+                return
+            }
+            MY_PERMISSIONS_INTERNET -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    Log.d("permission", "internet permission granted")
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    Log.d("permission", "internet permission denied")
                 }
                 return
             }
@@ -210,7 +242,31 @@ class MainActivity : AppCompatActivity() {
                 //TODO
             }
 
+            if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.INTERNET),
+                    MY_PERMISSIONS_INTERNET
+                )
+            } else {
+                //TODO
+            }
+
+            if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    MY_PERMISSIONS_READ_EXTERNAL_STORAGE
+                )
+            } else {
+                //TODO
+            }
+
             if(toGet == 0){
+                val latest = File(applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/latest.json")
+                if(latest.exists())
+                    latest.delete()
+
                 var refid_TXT = Filehandler(applicationContext).download("https://xkcd.com/info.0.json","latest.json","txt")
                 refidlist.add(refid_TXT);
                 json_refidlist.put(refid_TXT,toGet);
@@ -247,11 +303,11 @@ class MainActivity : AppCompatActivity() {
         if((prefs.contains("initialized")) && (prefs.getBoolean("initialized",false) == true)){
             latestComicNumber = prefs.getInt("latestComicNumber",latestComicNumber)
             currentComicNumber = prefs.getInt("currentComicNumber",currentComicNumber)
-            comiclist = comiclist.union(Filehandler(applicationContext).loadlist("comiclist.txt")).toMutableList()
+            comiclist = comiclist.union(Filehandler(applicationContext).loadlist("comiclist.json")).toMutableList()
             Toast.makeText(this,"Preferences Loaded",Toast.LENGTH_SHORT).show()
             getComic(currentComicNumber)
         } else {
-            latestComicNumber = 2
+            latestComicNumber = 1
             currentComicNumber = 1
             getComic(1)
             Toast.makeText(this,"New App Set up",Toast.LENGTH_SHORT).show()
@@ -263,7 +319,7 @@ class MainActivity : AppCompatActivity() {
         var editor = prefs.edit()
         editor.putInt("latestComicNumber",latestComicNumber)
         editor.putInt("currentComicNumber",currentComicNumber)
-        editor.putBoolean("initialized", false);
+        editor.putBoolean("initialized", true);
         editor.commit()
         //Toast.makeText(this,"Preferences Saved",Toast.LENGTH_SHORT).show()
     }

@@ -33,19 +33,12 @@ class Filehandler(private val context: Context) {
     }
 
     @Throws(IOException::class)
-    fun saveComic(comic: Comic,FILE_NAME: String) {
-        val number = comic.number
-        val title = comic.title
-        val altText = comic.altText
-        val imgPath = comic.imgPath
-        val urlPath = comic.imgUrl
-        val text = "$number \n $title \n $altText \n $urlPath \n $imgPath \n"
-
+    fun saveString(text: String,FILE_NAME: String) {
         var fos: FileOutputStream? = null
 
         try {
             Log.d("Saver", "Saver starting with data")
-            fos = context.openFileOutput(FILE_NAME+".txt", MODE_PRIVATE)
+            fos = context.openFileOutput(FILE_NAME, MODE_PRIVATE)
             fos!!.write(text.toByteArray())
             fos.close()
 
@@ -64,16 +57,19 @@ class Filehandler(private val context: Context) {
 
     @Throws(IOException::class)
     fun savelist(comiclist: List<Int>,FILE_NAME: String){
-        var text = ""
-        for (x in comiclist){
-            text = text + x + " \n "
-        }
+        var text = comiclist.toString()
+        //for (x in comiclist){
+        //    text = text + x + " \n "
+        //}
 
         var fos: FileOutputStream? = null
         try {
             Log.d("Saver", "Saver starting with comiclist")
-            fos = context.openFileOutput(FILE_NAME, MODE_PRIVATE)
-            fos!!.write(text.toByteArray())
+            //File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + FILE_NAME)
+            val fos = FileOutputStream(File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + FILE_NAME))
+
+            //fos = context.openFileOutput(FILE_NAME, MODE_PRIVATE)
+            fos.write(text.toByteArray())
             fos.close()
             Log.d("saver", "Saved to " + context.getFileStreamPath(FILE_NAME))
         } finally {
@@ -90,17 +86,15 @@ class Filehandler(private val context: Context) {
     @Throws(IOException::class)
     fun loadlist(FILE_NAME: String): MutableList<Int> {
         var fis: FileInputStream? = null
-        var comiclist = mutableListOf<Int>()
 
         try {
-            fis = context.openFileInput(FILE_NAME)
-            val isr = InputStreamReader(fis)
-            val br = BufferedReader(isr)
-            br.useLines { lines -> lines.forEach { it.toIntOrNull()?.let { it1 -> comiclist.add(it1) } } }
+            val fis = FileInputStream(File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + FILE_NAME))
+            var input = BufferedReader(InputStreamReader(fis)).readText()
+            val comiclist = input.removeSurrounding("[", "]").split(",").map { it.trim() }.map { it.toInt() }.toMutableList()
+            
             Log.d("loader", "loaded list of size: " + comiclist.size.toString())
 
             return comiclist;
-
         } finally {
             if (fis != null) {
                 try {
@@ -115,15 +109,7 @@ class Filehandler(private val context: Context) {
 
     @Throws(IOException::class)
     fun loadJson(FILE_NAME: String): Comic{
-        //var fis: FileInputStream? = null
-
-        //val fis = FileInputStream(context.getDir( "/ComicViewer/" + FILE_NAME,0))
-
         val fis = FileInputStream(File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + FILE_NAME))
-
-        //val XmlFile = getActivity().openFileInput(FILE_NAME)
-        //val result = StreamResult(getActivity().openFileOutput(FILE_NAME,getActivity().MODE_PRIVATE))
-        //fis = context.openFileInput(Environment.DIRECTORY_DOWNLOADS + "/ComicViewer/" + FILE_NAME)
 
         val reader = JsonReader(InputStreamReader(fis, "UTF-8"))
         try {
