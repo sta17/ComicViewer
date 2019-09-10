@@ -37,7 +37,7 @@
             android:textAllCaps="false"
             android:textColor="@android:color/black"
             android:textSize="18sp"
-            app:layout_constraintBottom_toTopOf="@+id/buttonUpdate"
+            app:layout_constraintBottom_toTopOf="@+id/buttonBoxBottom"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/displayImage" />
@@ -61,20 +61,6 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/buttonBox" />
-
-    <Button
-            android:id="@+id/buttonUpdate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="Update"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
             android:id="@+id/buttonBox"
@@ -125,5 +111,27 @@
                 android:layout_marginBottom="0dp"
                 android:layout_weight="1"
                 android:text="Last" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/buttonBoxBottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+                android:id="@+id/buttonfavourte"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Favourite" />
+
+        <Button
+                android:id="@+id/buttonUpdate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Update" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
