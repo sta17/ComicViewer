@@ -22,7 +22,8 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/displayTitle"
-            app:srcCompat="@drawable/ic_launcher_foreground" />
+            app:srcCompat="@drawable/ic_launcher_foreground"
+            android:contentDescription="@string/comic_image" />
 
     <TextView
             android:id="@+id/displayAlt"
@@ -33,11 +34,10 @@
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             android:gravity="center"
-            android:text="Description"
+            android:text="@string/description"
             android:textAllCaps="false"
             android:textColor="@android:color/black"
             android:textSize="18sp"
-            app:layout_constraintBottom_toTopOf="@+id/buttonBoxBottom"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/displayImage" />
@@ -51,9 +51,8 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:editable="false"
             android:gravity="center"
-            android:text="Title"
+            android:text="@string/title"
             android:textColor="@android:color/black"
             android:textSize="24sp"
             app:layout_constraintBottom_toTopOf="@+id/displayImage"
@@ -64,7 +63,8 @@
 
     <LinearLayout
             android:id="@+id/buttonBox"
-            android:layout_width="wrap_content"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintBottom_toTopOf="@+id/displayTitle"
@@ -74,24 +74,8 @@
             app:layout_constraintVertical_bias="0.0">
 
         <Button
-                android:id="@+id/buttonPrevious"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                android:layout_weight="1"
-                android:text="Previous" />
-
-        <Button
-                android:id="@+id/buttonNext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                android:layout_marginBottom="0dp"
-                android:layout_weight="1"
-                android:text="Next" />
-
-        <Button
                 android:id="@+id/buttonFirst"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="0dp"
@@ -99,10 +83,39 @@
                 android:layout_marginTop="0dp"
                 android:layout_marginBottom="0dp"
                 android:layout_weight="1"
-                android:text="First" />
+                android:text="@string/first"
+                android:textAllCaps="true"
+                android:textColor="@android:color/black"
+                android:textStyle="bold" />
+
+        <Button
+                android:id="@+id/buttonPrevious"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:layout_weight="1"
+                android:text="@string/previous"
+                android:textAllCaps="true"
+                android:textColor="@android:color/black"
+                android:textStyle="bold" />
+
+        <Button
+                android:id="@+id/buttonNext"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:layout_marginBottom="0dp"
+                android:layout_weight="1"
+                android:text="@string/next"
+                android:textAllCaps="true"
+                android:textColor="@android:color/black"
+                android:textStyle="bold" />
 
         <Button
                 android:id="@+id/buttonLast"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
@@ -110,8 +123,24 @@
                 android:layout_marginRight="0dp"
                 android:layout_marginBottom="0dp"
                 android:layout_weight="1"
-                android:text="Last" />
+                android:text="@string/last"
+                android:textAllCaps="true"
+                android:textColor="@android:color/black"
+                android:textStyle="bold" />
     </LinearLayout>
+
+    <TextView
+            android:id="@+id/updateDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/write_number_below_to_get_spesific_comic"
+            android:textColor="@android:color/black"
+            app:layout_constraintBottom_toTopOf="@+id/buttonBoxBottom"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.496"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
 
     <LinearLayout
             android:id="@+id/buttonBoxBottom"
@@ -120,18 +149,43 @@
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            style="?android:attr/buttonBarStyle" >
 
         <Button
                 android:id="@+id/buttonfavourte"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Favourite" />
+                android:text="@string/favourite"
+                android:textAllCaps="true"
+                android:textColor="@android:color/black"
+                android:textStyle="bold" />
+
+        <EditText
+                android:id="@+id/ComicNumberField"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:hint="@string/comic_number"
+                android:inputType="number"
+                android:textColor="@android:color/black"
+                android:textColorHighlight="@android:color/darker_gray"
+                android:textColorLink="@android:color/black"
+                android:textCursorDrawable="@android:color/black"
+                app:backgroundTint="@android:color/black"
+                android:importantForAutofill="no" />
 
         <Button
                 android:id="@+id/buttonUpdate"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Update" />
+                android:text="@string/update"
+                android:textAllCaps="true"
+                android:textColor="@android:color/black"
+                android:textStyle="bold" />
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

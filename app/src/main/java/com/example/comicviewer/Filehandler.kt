@@ -1,72 +1,50 @@
 package com.example.comicviewer
 
 import android.app.DownloadManager
-import android.content.Context.MODE_PRIVATE
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
-import android.util.Log
 import android.util.JsonReader
+import android.util.Log
 import java.io.*
 
 
-class Filehandler(private val context: Context) {
+class Filehandler(private val context: Context,private val address: String) {
 
     fun download(url: String, fileName: String, filetype: String): Long {
-        Log.d("download", "download file name: " + fileName)
-        var downloadManagervar = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        var Download_Uri = Uri.parse(url)
-        Log.d("download", "download url: " + Download_Uri.toString())
-        val request = DownloadManager.Request(Download_Uri)
+        Log.d("download", "download file name: $fileName")
+        val downloadManagervar =
+            context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        val downloadUri = Uri.parse(url)
+        Log.d("download", "download url: $downloadUri")
+        val request = DownloadManager.Request(downloadUri)
         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
         request.setAllowedOverRoaming(false)
-        request.setTitle("Comic Viewer Downloading comic " + filetype)
-        request.setDescription("Comic Viewer Downloading comic " + filetype)
-        request.setDestinationInExternalFilesDir(context,Environment.DIRECTORY_DOWNLOADS,"/ComicViewer/" + fileName)
-        //request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,"/ComicViewer/" + fileName)
-
-        //    Environment.DIRECTORY_DOWNLOADS,
-        //    "/ComicViewer/" + fileName
-        //)
-        var refid = downloadManagervar.enqueue(request)
-        return refid;
+        val description = "Comic Viewer Downloading comic $filetype"
+        request.setTitle(description)
+        request.setDescription(description)
+        request.setDestinationInExternalFilesDir(
+            context,
+            Environment.DIRECTORY_DOWNLOADS,
+            address + fileName
+        )
+        return downloadManagervar.enqueue(request)
     }
 
     @Throws(IOException::class)
-    fun saveString(text: String,FILE_NAME: String) {
-        var fos: FileOutputStream? = null
-
-        try {
-            Log.d("Saver", "Saver starting with data")
-            fos = context.openFileOutput(FILE_NAME, MODE_PRIVATE)
-            fos!!.write(text.toByteArray())
-            fos.close()
-
-            Log.d("saver", "Saved to " + context.getFileStreamPath(FILE_NAME))
-
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
-
-    @Throws(IOException::class)
-    fun savelist(comiclist: List<Int>,FILE_NAME: String){
-        var text = comiclist.toString()
-        //for (x in comiclist){
-        //    text = text + x + " \n "
-        //}
+    fun savelist(comiclist: List<Int>, FILE_NAME: String) {
+        val text = comiclist.toString()
 
         var fos: FileOutputStream? = null
         try {
             Log.d("Saver", "Saver starting with comiclist")
             //File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + FILE_NAME)
-            val fos = FileOutputStream(File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + FILE_NAME))
+            fos = FileOutputStream(
+                File(
+                    context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                    address + FILE_NAME
+                )
+            )
 
             //fos = context.openFileOutput(FILE_NAME, MODE_PRIVATE)
             fos.write(text.toByteArray())
@@ -88,13 +66,21 @@ class Filehandler(private val context: Context) {
         var fis: FileInputStream? = null
 
         try {
-            val fis = FileInputStream(File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + FILE_NAME))
-            var input = BufferedReader(InputStreamReader(fis)).readText()
-            val comiclist = input.removeSurrounding("[", "]").split(",").map { it.trim() }.map { it.toInt() }.toMutableList()
-            
+            fis = FileInputStream(
+                File(
+                    context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                    address + FILE_NAME
+                )
+            )
+            val input = BufferedReader(InputStreamReader(fis)).readText()
+            val inititalinput = input.removeSurrounding("[", "]")
+            if (inititalinput.isEmpty()) {
+                return mutableListOf()
+            }
+            val comiclist =
+                inititalinput.split(",").map { it.trim() }.map { it.toInt() }.toMutableList()
             Log.d("loader", "loaded list of size: " + comiclist.size.toString())
-
-            return comiclist;
+            return comiclist
         } finally {
             if (fis != null) {
                 try {
@@ -104,40 +90,47 @@ class Filehandler(private val context: Context) {
                 }
             }
         }
-        return mutableListOf<Int>()
     }
 
     @Throws(IOException::class)
-    fun loadJson(FILE_NAME: String): Comic{
-        val fis = FileInputStream(File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + FILE_NAME))
+    fun loadJson(FILE_NAME: String): Comic {
+        val fis = FileInputStream(
+            File(
+                context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                address + FILE_NAME
+            )
+        )
 
         val reader = JsonReader(InputStreamReader(fis, "UTF-8"))
-        try {
-            var number    = -1
-            var title     = ""
-            var altText   = ""
-            var imgPath   = ""
-            var urlPath   = ""
+            reader.use {
+                var number = -1
+                var title = ""
+                var altText = ""
+                var urlPath = ""
 
-            reader.beginObject()
-            while (reader.hasNext()) {
-                val name = reader.nextName()
-                if (name == "img") {
-                    urlPath = reader.nextString()
-                } else if (name == "alt") {
-                    altText = reader.nextString()
-                } else if (name == "num") {
-                    number = reader.nextInt()
-                } else if (name == "title") {
-                    title = reader.nextString()
-                } else {
+                reader.beginObject()
+                while (reader.hasNext()) {
+                    val name = reader.nextName()
+                    val input = reader.nextString()
+                    while (name == "img") {
+                        urlPath = input
+                    }
+                    while (name == "alt") {
+                        altText = input
+                    }
+                    while (name == "num") {
+                        number = input.toInt()
+                    }
+                    while (name == "title") {
+                        title = input
+                    }
                     reader.skipValue()
                 }
+
+                reader.endObject()
+                reader.close()
+                return Comic(number, title, altText, urlPath, "")
+
             }
-            reader.endObject()
-            return Comic(number,title,altText,urlPath,imgPath)
-        } finally {
-            reader.close()
-        }
     }
 }

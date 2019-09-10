@@ -1,23 +1,17 @@
 package com.example.comicviewer
 
-import android.content.Context.DOWNLOAD_SERVICE
-import androidx.core.content.ContextCompat.getSystemService
 import android.app.DownloadManager
-import android.content.Intent
-import androidx.annotation.NonNull
 import android.app.IntentService
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
-import android.util.JsonReader
 import androidx.annotation.Nullable
-import java.io.InputStream
-import java.io.InputStreamReader
 
 
 class DownloadComicService : IntentService("DownloadComicService") {
     override fun onHandleIntent(@Nullable intent: Intent?) {
         val destinationPath = intent!!.getStringExtra(DESTINATION_PATH)
-        val downloadPath    = intent!!.getStringExtra(DOWNLOAD_PATH)
+        val downloadPath    = intent.getStringExtra(DOWNLOAD_PATH)
         downloadComicData(downloadPath, destinationPath)
 
     }
