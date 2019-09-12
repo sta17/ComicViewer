@@ -1,4 +1,4 @@
-package com.example.comicviewer
+package no.steven.comicviewer
 
 import android.Manifest
 import android.app.DownloadManager
@@ -429,7 +429,10 @@ class MainActivity : AppCompatActivity() {
     //update display and text
     private fun updateComic(number: Int) {
         if (File(getExternalFilesDir(DIRECTORY_DOWNLOADS), "$address$number.json").exists()) {
-            val comic: Comic = Filehandler(applicationContext, address).loadJson("$number.json")
+            val comic: Comic = Filehandler(
+                applicationContext,
+                address
+            ).loadJson("$number.json")
             displayAlt.text = comic.altText
             displayTitle.text = comic.title
             d("update_comic", comic.imgPath)

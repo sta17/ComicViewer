@@ -1,4 +1,4 @@
-package com.example.comicviewer
+package no.steven.comicviewer
 
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4

@@ -1,4 +1,4 @@
-package com.example.comicviewer
+package no.steven.comicviewer
 
 import org.junit.Test
 
