@@ -12,4 +12,9 @@
     <string name="comic_image">Comic Image</string>
     <string name="description">Description</string>
     <string name="title">Title</string>
+    <string name="unknown">Unknown</string>
+    <string name="comic_not_found">Comic Not Found</string>
+    <string name="preferences_loaded">Preferences Loaded</string>
+    <string name="new_app_set_up">New App Set up</string>
+    <string name="comic_viewer_downloading_comic">Comic Viewer Downloading comic</string>
 </resources>
