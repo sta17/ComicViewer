@@ -5,18 +5,15 @@ import android.content.Context
 import android.net.Uri
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.util.JsonReader
-import android.util.Log.d
 import java.io.*
 
 
 class Filehandler(private val context: Context, private val address: String) {
 
     fun download(url: String, filename: String, filetype: String): Long {
-        d("download", "download file name: $filename")
         val downloadManagervar =
             context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val downloadUri = Uri.parse(url)
-        d("download", "download url: $downloadUri")
         val request = DownloadManager.Request(downloadUri)
         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
         request.setAllowedOverRoaming(false)
@@ -36,8 +33,6 @@ class Filehandler(private val context: Context, private val address: String) {
 
         var fos: FileOutputStream? = null
         try {
-            d("Saver", "Saver starting with comiclist")
-            //File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"/ComicViewer/" + filename)
             fos = FileOutputStream(
                 File(
                     context.getExternalFilesDir(DIRECTORY_DOWNLOADS),
@@ -48,7 +43,6 @@ class Filehandler(private val context: Context, private val address: String) {
             //fos = context.openFileOutput(filename, MODE_PRIVATE)
             fos.write(text.toByteArray())
             fos.close()
-            d("saver", "Saved to " + context.getFileStreamPath(filename))
         } finally {
             if (fos != null) {
                 try {
@@ -72,14 +66,12 @@ class Filehandler(private val context: Context, private val address: String) {
                 )
             )
             val input = BufferedReader(InputStreamReader(fis)).readText()
-            val inititalinput = input.removeSurrounding("[", "]")
-            if (inititalinput.isEmpty()) {
+            val inititalInput = input.removeSurrounding("[", "]")
+            if (inititalInput.isEmpty()) {
                 return mutableListOf()
             }
-            val comiclist =
-                inititalinput.split(",").map { it.trim() }.map { it.toInt() }.toMutableList()
-            d("loader", "loaded list of size: " + comiclist.size.toString())
-            return comiclist
+
+            return inititalInput.split(",").map { it.trim() }.map { it.toInt() }.toMutableList()
         } finally {
             if (fis != null) {
                 try {
@@ -100,7 +92,6 @@ class Filehandler(private val context: Context, private val address: String) {
             )
         )
 
-        d("loader", "loading file: $filename")
         val reader = JsonReader(InputStreamReader(fis, "UTF-8"))
         reader.use {
             var number = -1
