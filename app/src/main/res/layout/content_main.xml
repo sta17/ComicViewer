@@ -31,7 +31,6 @@
                 android:layout_weight="1"
                 android:text="@string/first"
                 android:textAllCaps="true"
-                android:textColor="@android:color/black"
                 android:textStyle="bold" />
 
         <Button
@@ -43,7 +42,6 @@
                 android:layout_weight="1"
                 android:text="@string/previous"
                 android:textAllCaps="true"
-                android:textColor="@android:color/black"
                 android:textStyle="bold" />
 
         <Button
@@ -56,7 +54,6 @@
                 android:layout_weight="1"
                 android:text="@string/next"
                 android:textAllCaps="true"
-                android:textColor="@android:color/black"
                 android:textStyle="bold" />
 
         <Button
@@ -71,7 +68,6 @@
                 android:layout_weight="1"
                 android:text="@string/last"
                 android:textAllCaps="true"
-                android:textColor="@android:color/black"
                 android:textStyle="bold" />
     </LinearLayout>
 
@@ -90,8 +86,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="start|top|end"
                 android:gravity="center"
-                android:text="@string/write_number_below_to_get_spesific_comic"
-                android:textColor="@android:color/black" />
+                android:text="@string/write_number_below_to_get_spesific_comic" />
 
         <LinearLayout
                 android:id="@+id/buttonBoxBottom"
@@ -108,7 +103,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/favourite"
                     android:textAllCaps="true"
-                    android:textColor="@android:color/black"
                     android:textStyle="bold" />
 
             <EditText
@@ -119,12 +113,7 @@
                     android:ems="10"
                     android:hint="@string/comic_number"
                     android:importantForAutofill="no"
-                    android:inputType="number"
-                    android:textColor="@android:color/black"
-                    android:textColorHighlight="@android:color/darker_gray"
-                    android:textColorLink="@android:color/black"
-                    android:textCursorDrawable="@android:color/black"
-                    app:backgroundTint="@android:color/black" />
+                    android:inputType="number"/>
 
             <Button
                     android:id="@+id/buttonUpdate"
@@ -133,7 +122,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/update"
                     android:textAllCaps="true"
-                    android:textColor="@android:color/black"
                     android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
@@ -157,7 +145,6 @@
                 android:layout_gravity="start|top|end"
                 android:gravity="center"
                 android:text="@string/title"
-                android:textColor="@android:color/black"
                 android:textSize="24sp" />
 
         <ImageView
@@ -176,7 +163,6 @@
                 android:gravity="center|top"
                 android:text="@string/description"
                 android:textAllCaps="false"
-                android:textColor="@android:color/black"
                 android:textSize="18sp" />
     </LinearLayout>
 

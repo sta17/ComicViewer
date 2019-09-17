@@ -2,8 +2,22 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.steven.comicviewer.no.steven.comicviewer.MainActivity">
-    <item android:id="@+id/action_settings"
-          android:title="@string/action_settings"
-          android:orderInCategory="100"
-          app:showAsAction="never"/>
+
+    <item
+            android:id="@+id/action_credits"
+            android:icon="@drawable/settings"
+            android:title="@string/credits"
+            app:showAsAction="never" />
+
+    <item
+            android:id="@+id/action_search"
+            android:icon="@drawable/transparency"
+            android:title="@string/search"
+            app:showAsAction="ifRoom" />
+
+    <item
+            android:id="@+id/action_favourite"
+            android:icon="@drawable/star"
+            android:title="@string/favourite"
+            app:showAsAction="ifRoom" />
 </menu>

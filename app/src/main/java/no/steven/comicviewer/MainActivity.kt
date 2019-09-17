@@ -1,12 +1,12 @@
 package no.steven.comicviewer
 
 import android.Manifest
+import android.app.AlertDialog
 import android.app.DownloadManager
 import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import android.graphics.BitmapFactory
 import android.widget.ImageView
@@ -20,13 +20,23 @@ import android.net.Uri
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.util.JsonReader
 import android.util.Log.d
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.EditText
 import androidx.core.content.ContextCompat
 import java.io.*
+import android.text.InputType.TYPE_CLASS_NUMBER
 
 
 // https://github.com/shortcut/android-coding-assignment - task.
 // https://www.journaldev.com/10096/android-viewpager-example-tutorial - viewpager tutorial.
+// https://tutorial.eyehunts.com/android/android-toolbar-example-android-app-bar-kotlin/ - action bar example
+// http://actionbarsherlock.com/ - action bar stuff
+// https://xkcd.com/
+// https://www.flaticon.com/free-icon/transparency_1076744#term=search&page=1&position=5 - Designed by ? from www.Flaticon - Gear
+// https://www.flaticon.com/free-icon/transparency_1076744#term=search&page=1&position=5 - Designed by ? from www.Flaticon - Compass
+// https://www.flaticon.com/free-icon/star_149222 - Designed by smashicons from www.Flaticon - Star
+// https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html - Comic Icon
 //TODO: Fix the latest comic thing, the need to check for latest number and to update it.
 class MainActivity : AppCompatActivity() {
 
@@ -52,7 +62,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
+        //setSupportActionBar(toolbar)
+        //setting toolbar
+        setSupportActionBar(findViewById(R.id.toolbar))
+        //home navigation
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
@@ -123,6 +137,73 @@ class MainActivity : AppCompatActivity() {
             updateComic(currentComicNumber - 1)
         }
 
+    }
+
+    private fun showDialog() {
+        val dDialog = AlertDialog.Builder(this)
+        val input = EditText(this)
+        input.inputType = TYPE_CLASS_NUMBER
+
+        dDialog.setTitle("Comic Retrieval")
+        dDialog.setMessage("Please Input desired comic number")
+        dDialog.setIcon(R.drawable.transparency)
+        dDialog.setView(input)
+
+        // Ok
+        dDialog.setPositiveButton("Go", { _, _ -> updateComic(input.text.toString().toInt()) })
+
+        // Cancel
+        dDialog.setNegativeButton("Cancel", { _, _ -> })
+        dDialog.show()
+
+    }
+
+    //setting menu in action bar
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main,menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+     override fun onPrepareOptionsMenu(menu: Menu?): Boolean{
+         if(currentComicNumber in favouritecomiclist){
+             menu!!.findItem(R.id.action_favourite).setIcon(R.drawable.star_filled)
+         }else {
+             menu!!.findItem(R.id.action_favourite).setIcon(R.drawable.star)
+         }
+         return super.onPrepareOptionsMenu(menu)
+    }
+
+    // actions on click menu items
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.action_search -> {
+            showDialog()
+            true
+        }
+        R.id.action_favourite -> {
+            if(currentComicNumber in favouritecomiclist){
+                favouritecomiclist.remove(currentComicNumber)
+                Toast.makeText(this,"Favourite Removed",Toast.LENGTH_LONG).show()
+            }else {
+                favouritecomiclist.add(currentComicNumber)
+                Toast.makeText(this,"Favourite Added",Toast.LENGTH_LONG).show()
+            }
+            this.invalidateOptionsMenu()
+            true
+        }
+        R.id.action_credits -> {
+            Toast.makeText(this,"Settings",Toast.LENGTH_LONG).show()
+            true
+        }
+        android.R.id.home ->{
+            Toast.makeText(this,"Home action",Toast.LENGTH_LONG).show()
+            true
+        }
+
+        else -> {
+            // If we got here, the user's action was not recognized.
+            // Invoke the superclass to handle it.
+            super.onOptionsItemSelected(item)
+        }
     }
 
     private var onComplete: BroadcastReceiver = object : BroadcastReceiver() {
@@ -206,7 +287,6 @@ class MainActivity : AppCompatActivity() {
 
         return true
     }
-
 
     override fun onDestroy() {
         super.onDestroy()
@@ -385,6 +465,7 @@ class MainActivity : AppCompatActivity() {
         }
         d("updateComic","number: $number")
         d("updateComic","comiclist: $comiclist")
+        d("updateComic","favouritecomiclist: $favouritecomiclist")
         d("updateComic","latest: $latestComicNumber")
     }
 
@@ -415,6 +496,7 @@ class MainActivity : AppCompatActivity() {
             )
         else
             displayImage.setImageDrawable(R.drawable.ic_launcher_foreground.toDrawable())
+        this.invalidateOptionsMenu()
     }
 
     /*
@@ -427,7 +509,7 @@ class MainActivity : AppCompatActivity() {
         else return false
     }
 
-    fun download(url: String, filename: String, filetype: String): Long {
+    private fun download(url: String, filename: String, filetype: String): Long {
         val downloadManagervar =
             getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val downloadUri = Uri.parse(url)
@@ -445,7 +527,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Throws(IOException::class)
-    fun savelist(comiclist: List<Int>, filename: String) {
+    private fun savelist(comiclist: List<Int>, filename: String) {
         val text = comiclist.toString()
 
         var fos: FileOutputStream? = null
@@ -472,7 +554,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Throws(IOException::class)
-    fun loadlist(filename: String): MutableList<Int> {
+    private fun loadlist(filename: String): MutableList<Int> {
         var fis: FileInputStream? = null
 
         try {
@@ -501,7 +583,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Throws(IOException::class)
-    fun loadJson(filename: String): Comic {
+    private fun loadJson(filename: String): Comic {
         val fis = FileInputStream(
             File(
                 getExternalFilesDir(DIRECTORY_DOWNLOADS),

@@ -13,7 +13,7 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
-            android:minSdkVersion="16">
+            android:minSdkVersion="21">
 
         <activity
                 android:name="no.steven.comicviewer.MainActivity"
