@@ -394,10 +394,10 @@ class MainActivity : AppCompatActivity() {
     private fun updateGraphics(number: Int) {
         if (File(getExternalFilesDir(DIRECTORY_DOWNLOADS), "$address$number.json").exists()) {
             val comic: Comic = loadJson("$number.json")
-            displayDescription.text = comic.altText
+            displayAlt.text = comic.altText
             displayTitle.text = comic.title
         } else {
-            displayDescription.text = resources.getString(R.string.comic_not_found)
+            displayAlt.text = resources.getString(R.string.comic_not_found)
             displayTitle.text = resources.getString(R.string.unknown)
         }
 
