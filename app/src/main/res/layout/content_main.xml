@@ -9,69 +9,15 @@
         tools:layout_editor_absoluteY="56dp"
         tools:showIn="@layout/activity_main">
 
-    <ImageView
-            android:id="@+id/displayImage"
-            android:layout_width="0dp"
-            android:layout_height="300dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/displayTitle"
-            app:srcCompat="@drawable/ic_launcher_foreground"
-            android:contentDescription="@string/comic_image" />
-
-    <TextView
-            android:id="@+id/displayAlt"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:gravity="center"
-            android:text="@string/description"
-            android:textAllCaps="false"
-            android:textColor="@android:color/black"
-            android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/displayImage" />
-
-    <TextView
-            android:id="@+id/displayTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:gravity="center"
-            android:text="@string/title"
-            android:textColor="@android:color/black"
-            android:textSize="24sp"
-            app:layout_constraintBottom_toTopOf="@+id/displayImage"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/buttonBox" />
-
     <LinearLayout
             android:id="@+id/buttonBox"
             style="?android:attr/buttonBarStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@+id/displayTitle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0">
+            app:layout_constraintTop_toTopOf="parent">
 
         <Button
                 android:id="@+id/buttonFirst"
@@ -129,63 +75,109 @@
                 android:textStyle="bold" />
     </LinearLayout>
 
-    <TextView
-            android:id="@+id/updateDescription"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/write_number_below_to_get_spesific_comic"
-            android:textColor="@android:color/black"
-            app:layout_constraintBottom_toTopOf="@+id/buttonBoxBottom"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.496"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="parent"
-            app:layout_constraintVertical_bias="1.0" />
-
     <LinearLayout
-            android:id="@+id/buttonBoxBottom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:id="@+id/buttonBoxBottomTotal"
+            android:layout_width="393dp"
+            android:layout_height="78dp"
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+                android:id="@+id/updateDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|top|end"
+                android:gravity="center"
+                android:text="@string/write_number_below_to_get_spesific_comic"
+                android:textColor="@android:color/black" />
+
+        <LinearLayout
+                android:id="@+id/buttonBoxBottom"
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start|end"
+                android:orientation="horizontal">
+
+            <Button
+                    android:id="@+id/buttonfavourte"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/favourite"
+                    android:textAllCaps="true"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+            <EditText
+                    android:id="@+id/ComicNumberField"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:hint="@string/comic_number"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:textColor="@android:color/black"
+                    android:textColorHighlight="@android:color/darker_gray"
+                    android:textColorLink="@android:color/black"
+                    android:textCursorDrawable="@android:color/black"
+                    app:backgroundTint="@android:color/black" />
+
+            <Button
+                    android:id="@+id/buttonUpdate"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/update"
+                    android:textAllCaps="true"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/comicDisplay"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/buttonBoxBottomTotal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            style="?android:attr/buttonBarStyle" >
+            app:layout_constraintTop_toBottomOf="@+id/buttonBox"
+            app:layout_constraintVertical_bias="0.0">
 
-        <Button
-                android:id="@+id/buttonfavourte"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
+        <TextView
+                android:id="@+id/displayTitle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/favourite"
-                android:textAllCaps="true"
+                android:layout_gravity="start|top|end"
+                android:gravity="center"
+                android:text="@string/title"
                 android:textColor="@android:color/black"
-                android:textStyle="bold" />
+                android:textSize="24sp" />
 
-        <EditText
-                android:id="@+id/ComicNumberField"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="10"
-                android:hint="@string/comic_number"
-                android:inputType="number"
-                android:textColor="@android:color/black"
-                android:textColorHighlight="@android:color/darker_gray"
-                android:textColorLink="@android:color/black"
-                android:textCursorDrawable="@android:color/black"
-                app:backgroundTint="@android:color/black"
-                android:importantForAutofill="no" />
+        <ImageView
+                android:id="@+id/displayImage"
+                android:layout_width="match_parent"
+                android:layout_height="356dp"
+                android:layout_gravity="center|start|center_horizontal|fill_horizontal|end"
+                android:contentDescription="@string/comic_image"
+                app:srcCompat="@drawable/ic_launcher_foreground" />
 
-        <Button
-                android:id="@+id/buttonUpdate"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/update"
-                android:textAllCaps="true"
+        <TextView
+                android:id="@+id/displayDescription"
+                android:layout_width="match_parent"
+                android:layout_height="152dp"
+                android:layout_gravity="bottom|start|end"
+                android:gravity="center|top"
+                android:text="@string/description"
+                android:textAllCaps="false"
                 android:textColor="@android:color/black"
-                android:textStyle="bold" />
+                android:textSize="18sp" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
