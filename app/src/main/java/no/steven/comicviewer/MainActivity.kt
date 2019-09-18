@@ -115,20 +115,6 @@ class MainActivity : AppCompatActivity() {
             updateComic(latestComicNumber)
         }
 
-        buttonfavourte.setOnClickListener {
-            if ((currentComicNumber !in favouritecomiclist)) {
-                favouritecomiclist.add(currentComicNumber)
-            } else if (currentComicNumber in favouritecomiclist) {
-                favouritecomiclist.remove(currentComicNumber)
-            }
-        }
-
-        buttonUpdate.setOnClickListener {
-            val changeTo = findViewById<EditText>(R.id.ComicNumberField).text.toString().toInt()
-            findViewById<EditText>(R.id.ComicNumberField).text.clear()
-            updateComic(changeTo)
-        }
-
         buttonNext.setOnClickListener {
             updateComic(currentComicNumber + 1)
         }

@@ -72,71 +72,15 @@
     </LinearLayout>
 
     <LinearLayout
-            android:id="@+id/buttonBoxBottomTotal"
-            android:layout_width="393dp"
-            android:layout_height="78dp"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-        <TextView
-                android:id="@+id/updateDescription"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start|top|end"
-                android:gravity="center"
-                android:text="@string/write_number_below_to_get_spesific_comic" />
-
-        <LinearLayout
-                android:id="@+id/buttonBoxBottom"
-                style="?android:attr/buttonBarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|start|end"
-                android:orientation="horizontal">
-
-            <Button
-                    android:id="@+id/buttonfavourte"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/favourite"
-                    android:textAllCaps="true"
-                    android:textStyle="bold" />
-
-            <EditText
-                    android:id="@+id/ComicNumberField"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ems="10"
-                    android:hint="@string/comic_number"
-                    android:importantForAutofill="no"
-                    android:inputType="number"/>
-
-            <Button
-                    android:id="@+id/buttonUpdate"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/update"
-                    android:textAllCaps="true"
-                    android:textStyle="bold" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
             android:id="@+id/comicDisplay"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:orientation="vertical"
-            app:layout_constraintBottom_toTopOf="@+id/buttonBoxBottomTotal"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/buttonBox"
-            app:layout_constraintVertical_bias="0.0">
+            app:layout_constraintTop_toBottomOf="@+id/buttonBox">
 
         <TextView
                 android:id="@+id/displayTitle"
