@@ -19,6 +19,7 @@
             android:layout_marginRight="0dp"
             android:gravity="center|top"
             android:text="@string/title"
+            android:textColor="@android:color/black"
             android:textSize="24sp" />
 
     <ImageView
@@ -56,6 +57,7 @@
             android:gravity="center|top"
             android:text="@string/description"
             android:textAllCaps="false"
+            android:textColor="@android:color/black"
             android:textSize="18sp" />
 
 </RelativeLayout>
