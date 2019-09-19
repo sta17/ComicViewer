@@ -27,17 +27,17 @@ import androidx.core.content.ContextCompat
 import java.io.*
 import android.text.InputType.TYPE_CLASS_NUMBER
 
-
 // https://github.com/shortcut/android-coding-assignment - task.
 // https://www.journaldev.com/10096/android-viewpager-example-tutorial - viewpager tutorial.
 // https://tutorial.eyehunts.com/android/android-toolbar-example-android-app-bar-kotlin/ - action bar example
 // http://actionbarsherlock.com/ - action bar stuff
 // https://xkcd.com/
 // https://www.flaticon.com/free-icon/transparency_1076744#term=search&page=1&position=5 - Designed by ? from www.Flaticon - Gear
-// https://www.flaticon.com/free-icon/transparency_1076744#term=search&page=1&position=5 - Designed by ? from www.Flaticon - Compass
+// https://www.flaticon.com/free-icon/transparency_1076744#term=search&page=1&position=5 - Designed by Freepik from www.Flaticon - Magnifying glass.
 // https://www.flaticon.com/free-icon/star_149222 - Designed by smashicons from www.Flaticon - Star
 // https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html - Comic Icon
-//TODO: Fix the latest comic thing, the need to check for latest number and to update it.
+// http://romannurik.github.io/AndroidAssetStudio/ - Asset generators
+//TODO: TODO...
 class MainActivity : AppCompatActivity() {
 
     private var currentComicNumber = 0
@@ -66,7 +66,8 @@ class MainActivity : AppCompatActivity() {
         //setting toolbar
         setSupportActionBar(findViewById(R.id.toolbar))
         //home navigation
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
 
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
@@ -125,25 +126,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun showDialog() {
-        val dDialog = AlertDialog.Builder(this)
-        val input = EditText(this)
-        input.inputType = TYPE_CLASS_NUMBER
-
-        dDialog.setTitle("Comic Retrieval")
-        dDialog.setMessage("Please Input desired comic number")
-        dDialog.setIcon(R.drawable.transparency)
-        dDialog.setView(input)
-
-        // Ok
-        dDialog.setPositiveButton("Go", { _, _ -> updateComic(input.text.toString().toInt()) })
-
-        // Cancel
-        dDialog.setNegativeButton("Cancel", { _, _ -> })
-        dDialog.show()
-
-    }
-
     //setting menu in action bar
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main,menu)
@@ -161,30 +143,49 @@ class MainActivity : AppCompatActivity() {
 
     // actions on click menu items
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+
         R.id.action_search -> {
-            showDialog()
+            val dDialog = AlertDialog.Builder(this)
+            val input = EditText(this)
+            input.inputType = TYPE_CLASS_NUMBER
+
+            dDialog.setTitle("Comic Retrieval")
+                .setMessage("Please Input desired comic number")
+                .setIcon(R.drawable.transparency)
+                .setCancelable(true)
+                .setView(input)
+                .setPositiveButton("Go") { _, _ -> updateComic(input.text.toString().toInt()) }
+                .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel()}
+                .create()
+                .show()
             true
         }
         R.id.action_favourite -> {
             if(currentComicNumber in favouritecomiclist){
                 favouritecomiclist.remove(currentComicNumber)
-                Toast.makeText(this,"Favourite Removed",Toast.LENGTH_LONG).show()
+                Toast.makeText(applicationContext,"Favourite Removed",Toast.LENGTH_LONG).show()
             }else {
                 favouritecomiclist.add(currentComicNumber)
-                Toast.makeText(this,"Favourite Added",Toast.LENGTH_LONG).show()
+                Toast.makeText(applicationContext,"Favourite Added",Toast.LENGTH_LONG).show()
             }
             this.invalidateOptionsMenu()
             true
         }
         R.id.action_credits -> {
-            Toast.makeText(this,"Settings",Toast.LENGTH_LONG).show()
+            val dDialog = AlertDialog.Builder(this,R.style.AppTheme_DialogTheme)
+                .setTitle("Credits")
+                .setMessage("xkcd by Randall Munroe at xkcd.com"
+                        +System.getProperty("line.separator")+System.getProperty("line.separator")+"Magnifying glass/Search button designed by Freepik from Flaticon "
+                        +System.getProperty("line.separator")+System.getProperty("line.separator")+"Star/Favourite button designed by smashicons from Flaticon"
+                        +System.getProperty("line.separator")+System.getProperty("line.separator")+ "App Icon made using romannurik.github.io/AndroidAssetStudio/"
+                        +System.getProperty("line.separator")+System.getProperty("line.separator")+ "App by Steven Aanetsen")
+                .setIcon(R.mipmap.ic_launcher)
+                .setCancelable(true)
+                .setNegativeButton("Back") { dialog, _ -> dialog.cancel()}
+                .create()
+            dDialog.show()
             true
         }
-        android.R.id.home ->{
-            Toast.makeText(this,"Home action",Toast.LENGTH_LONG).show()
-            true
-        }
-
         else -> {
             // If we got here, the user's action was not recognized.
             // Invoke the superclass to handle it.
@@ -333,34 +334,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun getComic(toGet: Int): Boolean {
         // Check if in list already:
-        if ((toGet in comiclist) && legalnumber(toGet)) {
-            return true
-            // if not in list
-        } else {
-            // if comic to get is 0, then save as latest, since comic count starts at 1
-            if (toGet == 0 || toGet == -1) {
-                downloadLatest()
-                return false
-            } else {
-                // if json not exist, then download, which will kickstart image download
-                if (!File(applicationContext.getExternalFilesDir(DIRECTORY_DOWNLOADS), "$address$toGet.json").exists()) {
-                    downloadJson(toGet)
-                    return false
-                } else if (!File(applicationContext.getExternalFilesDir(DIRECTORY_DOWNLOADS), "$address$toGet.png").exists()) {
-                    downloadImage(toGet)
-                    return false
-                } else {
-                    comiclist.add(toGet)
-                    return true
+        return when ((toGet in comiclist) && legalnumber(toGet)){
+            true -> true
+            false -> return when (toGet == 0 || toGet == -1){
+                true -> downloadLatest()
+                false -> return when ((toGet in comiclist) && legalnumber(toGet)){
+                    true -> true
+                    false -> return when (!File(applicationContext.getExternalFilesDir(DIRECTORY_DOWNLOADS), "$address$toGet.json").exists()) {
+                        true -> downloadJson(toGet)
+                        false -> return when (!File(applicationContext.getExternalFilesDir(DIRECTORY_DOWNLOADS), "$address$toGet.png").exists()) {
+                            true -> downloadImage(toGet)
+                            false -> comiclist.add(toGet)
+                        }
+                    }
                 }
             }
         }
     }
 
-    private fun downloadLatest(){
+    private fun downloadLatest(): Boolean {
         val latest = File(
             applicationContext.getExternalFilesDir(DIRECTORY_DOWNLOADS),
             "/ComicViewer/latest.json"
@@ -372,22 +366,25 @@ class MainActivity : AppCompatActivity() {
 
         downloadrefidlist[refidJson] = 0
         jsonRefidlist[refidJson] = 0
+        return false
     }
 
-    private fun downloadJson(toGet:Int){
+    private fun downloadJson(toGet:Int): Boolean {
         val refidJson = download("https://xkcd.com/$toGet/info.0.json", "$toGet.json", "txt")
 
         downloadrefidlist[refidJson] = toGet
         jsonRefidlist[refidJson] = toGet
+        return false
     }
 
-    private fun downloadImage(toGet:Int){
+    private fun downloadImage(toGet:Int): Boolean {
         val refidIMG = download(
             loadJson("$toGet.json").imgUrl, "$toGet.png", "png"
         )
 
         downloadrefidlist[refidIMG] = toGet
         imgRefidlist[refidIMG] = toGet
+        return false
     }
 
     private fun downloadFavourites(favouritecomiclist: MutableList<Int>){
@@ -409,11 +406,11 @@ class MainActivity : AppCompatActivity() {
             currentComicNumber = prefs.getInt("currentComicNumber", currentComicNumber)
             comiclist = comiclist.union(loadlist("comiclist.json")).toMutableList()
             favouritecomiclist = favouritecomiclist.union(loadlist("favouritecomiclist.json")).toMutableList()
-            Toast.makeText(this, resources.getString(R.string.preferences_loaded), Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, resources.getString(R.string.preferences_loaded), Toast.LENGTH_LONG).show()
         } else {
             latestComicNumber = 1
             currentComicNumber = 1
-            Toast.makeText(this, resources.getString(R.string.new_app_set_up), Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, resources.getString(R.string.new_app_set_up), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -427,7 +424,7 @@ class MainActivity : AppCompatActivity() {
         editor.putInt("currentComicNumber", currentComicNumber)
         editor.putBoolean("initialized", true)
         editor.apply()
-        //Toast.makeText(this,"Preferences Saved",Toast.LENGTH_SHORT).show()
+        Toast.makeText(applicationContext,"Preferences Saved",Toast.LENGTH_SHORT).show()
         savelist(comiclist, "comiclist.json")
         savelist(
             favouritecomiclist,
@@ -491,8 +488,10 @@ class MainActivity : AppCompatActivity() {
     false if not
      */
     private fun legalnumber(number: Int): Boolean {
-        if ((firstComicNumber <= number) && (number <= latestComicNumber)) return true
-        else return false
+        return when ((firstComicNumber <= number) && (number <= latestComicNumber)) {
+            true -> true
+            false -> false
+        }
     }
 
     private fun download(url: String, filename: String, filetype: String): Long {
