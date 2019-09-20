@@ -1,4 +1,4 @@
-package no.steven.comicviewer
+package no.steven.comicapp
 
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getTargetContext()
-        assertEquals("com.example.no.steven.comicviewer", appContext.packageName)
+        assertEquals("com.example.no.steven.comicapp", appContext.packageName)
     }
 }

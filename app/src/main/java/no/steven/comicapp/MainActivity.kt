@@ -1,4 +1,4 @@
-package no.steven.comicviewer
+package no.steven.comicapp
 
 import android.Manifest
 import android.app.AlertDialog
@@ -37,7 +37,8 @@ import java.io.*
 // https://www.flaticon.com/free-icon/star_149222 - Designed by smashicons from www.Flaticon - Star
 // https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html - Comic Icon
 // http://romannurik.github.io/AndroidAssetStudio/ - Asset generators
-//TODO: make most of the comic pages cleanable as junk except for favourites
+//TODO: make most of the comic pages cleanable as junk except for favourites.
+//TODO: set the page update to happen upon comic image download, immediately.
 class MainActivity : AppCompatActivity() {
 
     private var currentComicNumber = 0

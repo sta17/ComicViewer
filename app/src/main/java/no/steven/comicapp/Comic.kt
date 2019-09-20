@@ -1,4 +1,4 @@
-package no.steven.comicviewer
+package no.steven.comicapp
 
 data class Comic (
     val number: Int,

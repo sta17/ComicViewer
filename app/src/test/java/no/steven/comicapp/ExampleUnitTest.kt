@@ -1,4 +1,4 @@
-package no.steven.comicviewer
+package no.steven.comicapp
 
 import org.junit.Test
 
