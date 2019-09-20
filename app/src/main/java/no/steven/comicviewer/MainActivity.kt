@@ -37,7 +37,7 @@ import android.text.InputType.TYPE_CLASS_NUMBER
 // https://www.flaticon.com/free-icon/star_149222 - Designed by smashicons from www.Flaticon - Star
 // https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html - Comic Icon
 // http://romannurik.github.io/AndroidAssetStudio/ - Asset generators
-//TODO: TODO...
+//TODO: make most of the comic pages cleanable as junk except for favourites
 class MainActivity : AppCompatActivity() {
 
     private var currentComicNumber = 0
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-        downloadLocation = applicationContext.getExternalFilesDir(DIRECTORY_DOWNLOADS)!!
+        downloadLocation = this.getExternalFilesDir(DIRECTORY_DOWNLOADS)!!
 
         // get permission
         val permissionCheckWriteExternalStorage =
