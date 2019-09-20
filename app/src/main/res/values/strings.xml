@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Comic Viewer</string>
+    <string name="app_name">A Comic App</string>
     <string name="action_settings">Settings</string>
     <string name="update">Update</string>
     <string name="next">Next</string>

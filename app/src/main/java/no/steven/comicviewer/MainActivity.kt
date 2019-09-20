@@ -59,6 +59,8 @@ class MainActivity : AppCompatActivity() {
 
     private var sharedPrefs = "Stevens Comic Viewer"
 
+    private lateinit var downloadLocation: File
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -70,6 +72,7 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        downloadLocation = applicationContext.getExternalFilesDir(DIRECTORY_DOWNLOADS)!!
 
         // get permission
         val permissionCheckWriteExternalStorage =
@@ -222,11 +225,11 @@ class MainActivity : AppCompatActivity() {
         latestComicNumber = downloadedComic.number
 
         val notRenamed = File(
-            applicationContext.getExternalFilesDir(DIRECTORY_DOWNLOADS),
+            downloadLocation,
             "/ComicViewer/latest.json"
         )
         val renameTo = File(
-            applicationContext.getExternalFilesDir(DIRECTORY_DOWNLOADS),
+            downloadLocation,
             "/ComicViewer/$toGet.json"
         )
 
@@ -234,7 +237,7 @@ class MainActivity : AppCompatActivity() {
             notRenamed.renameTo(renameTo)
         }
 
-        if(state == 0){
+        if((state == 0) && (!File(downloadLocation, "$address$toGet.png").exists())){
             val imageUrl = downloadedComic.imgUrl
             val refidIMG = download(
                 imageUrl,
@@ -253,15 +256,16 @@ class MainActivity : AppCompatActivity() {
 
         val imageUrl = downloadedComic.imgUrl
 
-        val refidIMG = download(
-            imageUrl,
-            "$toGet.png",
-            "png"
-        )
-        downloadrefidlist.remove(referenceId)
-        downloadrefidlist[refidIMG] = toGet
-        imgRefidlist[refidIMG] = toGet
-
+        if(!File(downloadLocation, "$address$toGet.png").exists()){
+            val refidIMG = download(
+                imageUrl,
+                "$toGet.png",
+                "png"
+            )
+            downloadrefidlist.remove(referenceId)
+            downloadrefidlist[refidIMG] = toGet
+            imgRefidlist[refidIMG] = toGet
+        }
         return true
     }
 
@@ -342,9 +346,9 @@ class MainActivity : AppCompatActivity() {
                 true -> downloadLatest()
                 false -> return when ((toGet in comiclist) && legalnumber(toGet)){
                     true -> true
-                    false -> return when (!File(applicationContext.getExternalFilesDir(DIRECTORY_DOWNLOADS), "$address$toGet.json").exists()) {
+                    false -> return when (!File(downloadLocation, "$address$toGet.json").exists()) {
                         true -> downloadJson(toGet)
-                        false -> return when (!File(applicationContext.getExternalFilesDir(DIRECTORY_DOWNLOADS), "$address$toGet.png").exists()) {
+                        false -> return when (!File(downloadLocation, "$address$toGet.png").exists()) {
                             true -> downloadImage(toGet)
                             false -> comiclist.add(toGet)
                         }
@@ -356,7 +360,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun downloadLatest(): Boolean {
         val latest = File(
-            applicationContext.getExternalFilesDir(DIRECTORY_DOWNLOADS),
+            downloadLocation,
             "/ComicViewer/latest.json"
         )
         if (latest.exists())
@@ -456,7 +460,7 @@ class MainActivity : AppCompatActivity() {
     update display and text
      */
     private fun updateGraphics(number: Int) {
-        if (File(getExternalFilesDir(DIRECTORY_DOWNLOADS), "$address$number.json").exists()) {
+        if (File(downloadLocation, "$address$number.json").exists()) {
             val comic: Comic = loadJson("$number.json")
             displayDescription.text = comic.altText
             displayTitle.text = comic.title
@@ -466,12 +470,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         val displayImage = findViewById<ImageView>(R.id.displayImage)
-        if (File(getExternalFilesDir(DIRECTORY_DOWNLOADS), "$address$number.png").exists())
+        if (File(downloadLocation, "$address$number.png").exists())
             displayImage.setImageBitmap(
                 BitmapFactory.decodeStream(
                     FileInputStream(
                         File(
-                            getExternalFilesDir(DIRECTORY_DOWNLOADS),
+                            downloadLocation,
                             "$address$number.png"
                         ).absolutePath
                     )
@@ -519,7 +523,7 @@ class MainActivity : AppCompatActivity() {
         try {
             fos = FileOutputStream(
                 File(
-                    getExternalFilesDir(DIRECTORY_DOWNLOADS),
+                    downloadLocation,
                     address + filename
                 )
             )
@@ -545,7 +549,7 @@ class MainActivity : AppCompatActivity() {
         try {
             fis = FileInputStream(
                 File(
-                    getExternalFilesDir(DIRECTORY_DOWNLOADS),
+                    downloadLocation,
                     address + filename
                 )
             )
@@ -571,7 +575,7 @@ class MainActivity : AppCompatActivity() {
     private fun loadJson(filename: String): Comic {
         val fis = FileInputStream(
             File(
-                getExternalFilesDir(DIRECTORY_DOWNLOADS),
+                downloadLocation,
                 address + filename
             )
         )
