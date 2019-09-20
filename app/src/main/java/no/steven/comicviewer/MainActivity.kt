@@ -3,29 +3,29 @@ package no.steven.comicviewer
 import android.Manifest
 import android.app.AlertDialog
 import android.app.DownloadManager
-import android.content.Context
-import android.os.Bundle
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.content_main.*
-import android.graphics.BitmapFactory
-import android.widget.ImageView
-import android.content.Intent
 import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
-import androidx.core.graphics.drawable.toDrawable
-import androidx.core.app.ActivityCompat
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Bundle
 import android.os.Environment.DIRECTORY_DOWNLOADS
+import android.text.InputType.TYPE_CLASS_NUMBER
 import android.util.JsonReader
 import android.util.Log.d
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
+import kotlinx.android.synthetic.main.content_main.*
 import java.io.*
-import android.text.InputType.TYPE_CLASS_NUMBER
 
 // https://github.com/shortcut/android-coding-assignment - task.
 // https://www.journaldev.com/10096/android-viewpager-example-tutorial - viewpager tutorial.
@@ -131,17 +131,17 @@ class MainActivity : AppCompatActivity() {
 
     //setting menu in action bar
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main,menu)
+        menuInflater.inflate(R.menu.menu_main, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
-     override fun onPrepareOptionsMenu(menu: Menu?): Boolean{
-         if(currentComicNumber in favouritecomiclist){
-             menu!!.findItem(R.id.action_favourite).setIcon(R.drawable.star_filled)
-         }else {
-             menu!!.findItem(R.id.action_favourite).setIcon(R.drawable.star)
-         }
-         return super.onPrepareOptionsMenu(menu)
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        if (currentComicNumber in favouritecomiclist) {
+            menu!!.findItem(R.id.action_favourite).setIcon(R.drawable.star_filled)
+        } else {
+            menu!!.findItem(R.id.action_favourite).setIcon(R.drawable.star)
+        }
+        return super.onPrepareOptionsMenu(menu)
     }
 
     // actions on click menu items
@@ -158,33 +158,35 @@ class MainActivity : AppCompatActivity() {
                 .setCancelable(true)
                 .setView(input)
                 .setPositiveButton("Go") { _, _ -> updateComic(input.text.toString().toInt()) }
-                .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel()}
+                .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
                 .create()
                 .show()
             true
         }
         R.id.action_favourite -> {
-            if(currentComicNumber in favouritecomiclist){
+            if (currentComicNumber in favouritecomiclist) {
                 favouritecomiclist.remove(currentComicNumber)
-                Toast.makeText(applicationContext,"Favourite Removed",Toast.LENGTH_LONG).show()
-            }else {
+                Toast.makeText(applicationContext, "Favourite Removed", Toast.LENGTH_LONG).show()
+            } else {
                 favouritecomiclist.add(currentComicNumber)
-                Toast.makeText(applicationContext,"Favourite Added",Toast.LENGTH_LONG).show()
+                Toast.makeText(applicationContext, "Favourite Added", Toast.LENGTH_LONG).show()
             }
             this.invalidateOptionsMenu()
             true
         }
         R.id.action_credits -> {
-            val dDialog = AlertDialog.Builder(this,R.style.AppTheme_DialogTheme)
+            val dDialog = AlertDialog.Builder(this, R.style.AppTheme_DialogTheme)
                 .setTitle("Credits")
-                .setMessage("xkcd by Randall Munroe at xkcd.com"
-                        +System.getProperty("line.separator")+System.getProperty("line.separator")+"Magnifying glass/Search button designed by Freepik from Flaticon "
-                        +System.getProperty("line.separator")+System.getProperty("line.separator")+"Star/Favourite button designed by smashicons from Flaticon"
-                        +System.getProperty("line.separator")+System.getProperty("line.separator")+ "App Icon made using romannurik.github.io/AndroidAssetStudio/"
-                        +System.getProperty("line.separator")+System.getProperty("line.separator")+ "App by Steven Aanetsen")
+                .setMessage(
+                    "xkcd by Randall Munroe at xkcd.com"
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "Magnifying glass/Search button designed by Freepik from Flaticon "
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "Star/Favourite button designed by smashicons from Flaticon"
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "App Icon made using romannurik.github.io/AndroidAssetStudio/"
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "App by Steven Aanetsen"
+                )
                 .setIcon(R.mipmap.ic_launcher)
                 .setCancelable(true)
-                .setNegativeButton("Back") { dialog, _ -> dialog.cancel()}
+                .setNegativeButton("Back") { dialog, _ -> dialog.cancel() }
                 .create()
             dDialog.show()
             true
@@ -210,7 +212,7 @@ class MainActivity : AppCompatActivity() {
                 if (toGet == 0 || toGet == -1) {
                     handleLatest(toGet)
                 } else {
-                    handleJson(toGet,referenceId)
+                    handleJson(toGet, referenceId)
                 }
             } else if (imgRefidlist.contains(referenceId)) {
                 handleImage(referenceId)
@@ -237,7 +239,7 @@ class MainActivity : AppCompatActivity() {
             notRenamed.renameTo(renameTo)
         }
 
-        if((state == 0) && (!File(downloadLocation, "$address$toGet.png").exists())){
+        if ((state == 0) && (!File(downloadLocation, "$address$toGet.png").exists())) {
             val imageUrl = downloadedComic.imgUrl
             val refidIMG = download(
                 imageUrl,
@@ -251,12 +253,12 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    private fun handleJson(toGet: Int,referenceId:Long): Boolean {
+    private fun handleJson(toGet: Int, referenceId: Long): Boolean {
         val downloadedComic = loadJson("$toGet.json")
 
         val imageUrl = downloadedComic.imgUrl
 
-        if(!File(downloadLocation, "$address$toGet.png").exists()){
+        if (!File(downloadLocation, "$address$toGet.png").exists()) {
             val refidIMG = download(
                 imageUrl,
                 "$toGet.png",
@@ -269,8 +271,8 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    private fun handleImage(referenceId:Long): Boolean {
-        val toGet:Int = imgRefidlist[referenceId]!!
+    private fun handleImage(referenceId: Long): Boolean {
+        val toGet: Int = imgRefidlist[referenceId]!!
 
         imgRefidlist.remove(referenceId)
         downloadrefidlist.remove(referenceId)
@@ -340,15 +342,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun getComic(toGet: Int): Boolean {
         // Check if in list already:
-        return when ((toGet in comiclist) && legalnumber(toGet)){
+        return when ((toGet in comiclist) && legalnumber(toGet)) {
             true -> true
-            false -> return when (toGet == 0 || toGet == -1){
+            false -> return when (toGet == 0 || toGet == -1) {
                 true -> downloadLatest()
-                false -> return when ((toGet in comiclist) && legalnumber(toGet)){
+                false -> return when ((toGet in comiclist) && legalnumber(toGet)) {
                     true -> true
                     false -> return when (!File(downloadLocation, "$address$toGet.json").exists()) {
                         true -> downloadJson(toGet)
-                        false -> return when (!File(downloadLocation, "$address$toGet.png").exists()) {
+                        false -> return when (!File(
+                            downloadLocation,
+                            "$address$toGet.png"
+                        ).exists()) {
                             true -> downloadImage(toGet)
                             false -> comiclist.add(toGet)
                         }
@@ -373,7 +378,7 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    private fun downloadJson(toGet:Int): Boolean {
+    private fun downloadJson(toGet: Int): Boolean {
         val refidJson = download("https://xkcd.com/$toGet/info.0.json", "$toGet.json", "txt")
 
         downloadrefidlist[refidJson] = toGet
@@ -381,7 +386,7 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    private fun downloadImage(toGet:Int): Boolean {
+    private fun downloadImage(toGet: Int): Boolean {
         val refidIMG = download(
             loadJson("$toGet.json").imgUrl, "$toGet.png", "png"
         )
@@ -391,8 +396,8 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    private fun downloadFavourites(favouritecomiclist: MutableList<Int>){
-        if(favouritecomiclist.isNotEmpty()){
+    private fun downloadFavourites(favouritecomiclist: MutableList<Int>) {
+        if (favouritecomiclist.isNotEmpty()) {
             val iterator = favouritecomiclist.listIterator()
             for (comicNumber in iterator) {
                 getComic(comicNumber)
@@ -409,26 +414,35 @@ class MainActivity : AppCompatActivity() {
             latestComicNumber = prefs.getInt("latestComicNumber", latestComicNumber)
             currentComicNumber = prefs.getInt("currentComicNumber", currentComicNumber)
             comiclist = comiclist.union(loadlist("comiclist.json")).toMutableList()
-            favouritecomiclist = favouritecomiclist.union(loadlist("favouritecomiclist.json")).toMutableList()
-            Toast.makeText(applicationContext, resources.getString(R.string.preferences_loaded), Toast.LENGTH_LONG).show()
+            favouritecomiclist =
+                favouritecomiclist.union(loadlist("favouritecomiclist.json")).toMutableList()
+            Toast.makeText(
+                applicationContext,
+                resources.getString(R.string.preferences_loaded),
+                Toast.LENGTH_LONG
+            ).show()
         } else {
             latestComicNumber = 1
             currentComicNumber = 1
-            Toast.makeText(applicationContext, resources.getString(R.string.new_app_set_up), Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                applicationContext,
+                resources.getString(R.string.new_app_set_up),
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
     /*
     save preferences, comiclist and favourites
      */
-    private fun saveState(){
+    private fun saveState() {
         val prefs = getSharedPreferences(sharedPrefs, Context.MODE_PRIVATE)
         val editor = prefs.edit()
         editor.putInt("latestComicNumber", latestComicNumber)
         editor.putInt("currentComicNumber", currentComicNumber)
         editor.putBoolean("initialized", true)
         editor.apply()
-        Toast.makeText(applicationContext,"Preferences Saved",Toast.LENGTH_SHORT).show()
+        Toast.makeText(applicationContext, "Preferences Saved", Toast.LENGTH_SHORT).show()
         savelist(comiclist, "comiclist.json")
         savelist(
             favouritecomiclist,
@@ -440,7 +454,7 @@ class MainActivity : AppCompatActivity() {
         if (legalnumber(number)) {
             val result = getComic(number)
             if (result) {
-                d("updateComic","updating number: $number")
+                d("updateComic", "updating number: $number")
                 currentComicNumber = number
                 updateGraphics(currentComicNumber)
             }
@@ -450,10 +464,10 @@ class MainActivity : AppCompatActivity() {
             //    updateGraphics(currentComicNumber)
             //}
         }
-        d("updateComic","number: $number")
-        d("updateComic","comiclist: $comiclist")
-        d("updateComic","favouritecomiclist: $favouritecomiclist")
-        d("updateComic","latest: $latestComicNumber")
+        d("updateComic", "number: $number")
+        d("updateComic", "comiclist: $comiclist")
+        d("updateComic", "favouritecomiclist: $favouritecomiclist")
+        d("updateComic", "latest: $latestComicNumber")
     }
 
     /*
