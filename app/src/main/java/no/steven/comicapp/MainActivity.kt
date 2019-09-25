@@ -41,6 +41,7 @@ import java.io.*
 // http://romannurik.github.io/AndroidAssetStudio/ - Asset generators
 //TODO: make most of the comic pages cleanable as junk except for favourites.
 //TODO: set the page update to happen upon comic image download, immediately, rather then second button push.
+//BUG: update image on button click. Handle download done, update now and clean download handling code.
 class MainActivity : AppCompatActivity() {
 
     private var currentComicNumber = 0
@@ -85,7 +86,8 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.INTERNET
                 )
             ) {
-                //NORMAL stuff here
+                // Normal stuff here
+                // Need to move stuff into here? since otherwise, it get weird if they say no.
             } else {
                 //if permission is not granted, then we ask for it
                 ActivityCompat.requestPermissions(
@@ -287,54 +289,6 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         saveState()
-    }
-
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>, grantResults: IntArray
-    ) {
-        when (requestCode) {
-            myPermissionsWriteExternalStorage -> {
-                // If request is cancelled, the result arrays are empty.
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return
-            }
-            myPermissionsReadExternalStorage -> {
-                // If request is cancelled, the result arrays are empty.
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return
-            }
-            myPermissionsInternet -> {
-                // If request is cancelled, the result arrays are empty.
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return
-            }
-
-            // Add other 'when' lines to check for other
-            // permissions this app might request.
-            else -> {
-                // Ignore all other requests.
-            }
-        }
     }
 
     private fun getComic(toGet: Int): Boolean {
