@@ -11,8 +11,10 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.text.InputType.TYPE_CLASS_NUMBER
+import android.text.SpannableStringBuilder
 import android.util.JsonReader
 import android.util.Log.d
 import android.view.Menu
@@ -22,8 +24,8 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.text.bold
 import kotlinx.android.synthetic.main.content_main.*
 import java.io.*
 
@@ -32,84 +34,76 @@ import java.io.*
 // https://tutorial.eyehunts.com/android/android-toolbar-example-android-app-bar-kotlin/ - action bar example
 // http://actionbarsherlock.com/ - action bar stuff
 // https://xkcd.com/
-// https://www.flaticon.com/free-icon/transparency_1076744#term=search&page=1&position=5 - Designed by ? from www.Flaticon - Gear
-// https://www.flaticon.com/free-icon/transparency_1076744#term=search&page=1&position=5 - Designed by Freepik from www.Flaticon - Magnifying glass.
-// https://www.flaticon.com/free-icon/star_149222 - Designed by smashicons from www.Flaticon - Star
+// https://www.flaticon.com/free-icon/transparency_1076744#term=search&page=1&position=5 - Designed by ? from Flaticon - Gear
+// https://www.flaticon.com/free-icon/transparency_1076744#term=search&page=1&position=5 - Designed by Freepik from Flaticon - Magnifying glass.
+// https://www.flaticon.com/free-icon/star_149222 - Designed by smashicons from Flaticon - Star
 // https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html - Comic Icon
 // http://romannurik.github.io/AndroidAssetStudio/ - Asset generators
 //TODO: make most of the comic pages cleanable as junk except for favourites.
-//TODO: set the page update to happen upon comic image download, immediately.
+//TODO: set the page update to happen upon comic image download, immediately, rather then second button push.
 class MainActivity : AppCompatActivity() {
 
     private var currentComicNumber = 0
     private var latestComicNumber = 0
     private var firstComicNumber = 1
 
-    private var comiclist = mutableListOf<Int>()
-    private var favouritecomiclist = mutableListOf<Int>()
+    private var comicList = mutableListOf<Int>()
+    private var favouriteComicList = mutableListOf<Int>()
 
-    private val address = "/ComicViewer/"
-
-    private var downloadrefidlist: MutableMap<Long, Int> = mutableMapOf()
-    private var imgRefidlist: MutableMap<Long, Int> = mutableMapOf()
-    private var jsonRefidlist: MutableMap<Long, Int> = mutableMapOf()
+    private var downloadRefIdList: MutableMap<Long, Int> = mutableMapOf()
+    private var imgRefIdList: MutableMap<Long, Int> = mutableMapOf()
+    private var jsonRefIdList: MutableMap<Long, Int> = mutableMapOf()
 
     private val myPermissionsWriteExternalStorage = 1
     private val myPermissionsReadExternalStorage = 1
     private val myPermissionsInternet = 1
 
-    private var sharedPrefs = "Stevens Comic Viewer"
+    private var sharedPrefs = "Steven's a Comic App"
 
     private lateinit var downloadLocation: File
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        //setSupportActionBar(toolbar)
-        //setting toolbar
         setSupportActionBar(findViewById(R.id.toolbar))
-        //home navigation
         supportActionBar?.setDisplayHomeAsUpEnabled(false)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         downloadLocation = this.getExternalFilesDir(DIRECTORY_DOWNLOADS)!!
 
-        // get permission
-        val permissionCheckWriteExternalStorage =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        if (permissionCheckWriteExternalStorage != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                myPermissionsWriteExternalStorage
-            )
-        }
 
-        val permissionCheckInternet =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
-        if (permissionCheckInternet != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.INTERNET),
-                myPermissionsInternet
-            )
-        }
-
-        val permissionCheckReadExternalStorage =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-        if (permissionCheckReadExternalStorage != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                myPermissionsReadExternalStorage
-            )
+        if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) {
+            if (PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) && PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) && PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.INTERNET
+                )
+            ) {
+                //NORMAL stuff here
+            } else {
+                //if permission is not granted, then we ask for it
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.INTERNET
+                    ),
+                    1
+                )
+            }
         }
 
         //Setup
         loadPrefs() // get the preferences
         getComic(-1) // get latest
-        downloadFavourites(favouritecomiclist) // get favouties
+        downloadFavourites(favouriteComicList) // get favorites
         updateComic(currentComicNumber) // get the last viewed
 
         buttonFirst.setOnClickListener {
@@ -137,7 +131,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        if (currentComicNumber in favouritecomiclist) {
+        if (currentComicNumber in favouriteComicList) {
             menu!!.findItem(R.id.action_favourite).setIcon(R.drawable.star_filled)
         } else {
             menu!!.findItem(R.id.action_favourite).setIcon(R.drawable.star)
@@ -165,11 +159,11 @@ class MainActivity : AppCompatActivity() {
             true
         }
         R.id.action_favourite -> {
-            if (currentComicNumber in favouritecomiclist) {
-                favouritecomiclist.remove(currentComicNumber)
+            if (currentComicNumber in favouriteComicList) {
+                favouriteComicList.remove(currentComicNumber)
                 Toast.makeText(applicationContext, "Favourite Removed", Toast.LENGTH_LONG).show()
             } else {
-                favouritecomiclist.add(currentComicNumber)
+                favouriteComicList.add(currentComicNumber)
                 Toast.makeText(applicationContext, "Favourite Added", Toast.LENGTH_LONG).show()
             }
             this.invalidateOptionsMenu()
@@ -201,13 +195,13 @@ class MainActivity : AppCompatActivity() {
 
     private var onComplete: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctxt: Context, intent: Intent) {
-            // get the refid from the download manager
+            // get the RefId from the download manager
             val referenceId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
 
             // check if download is json download
-            if (jsonRefidlist.contains(referenceId)) {
-                val toGet: Int = jsonRefidlist[referenceId]!!
-                jsonRefidlist.remove(referenceId)
+            if (jsonRefIdList.contains(referenceId)) {
+                val toGet: Int = jsonRefIdList[referenceId]!!
+                jsonRefIdList.remove(referenceId)
 
                 // check if latest comic
                 if (toGet == 0 || toGet == -1) {
@@ -215,7 +209,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     handleJson(toGet, referenceId)
                 }
-            } else if (imgRefidlist.contains(referenceId)) {
+            } else if (imgRefIdList.contains(referenceId)) {
                 handleImage(referenceId)
             }
         }
@@ -227,28 +221,30 @@ class MainActivity : AppCompatActivity() {
         val toGet = downloadedComic.number
         latestComicNumber = downloadedComic.number
 
-        val notRenamed = File(
-            downloadLocation,
-            "/ComicViewer/latest.json"
-        )
-        val renameTo = File(
-            downloadLocation,
-            "/ComicViewer/$toGet.json"
-        )
+        if ((state == 0) && (!File(downloadLocation, "$toGet.json").exists())) {
+            val notRenamed = File(
+                downloadLocation,
+                "/latest.json"
+            )
+            val renameTo = File(
+                downloadLocation,
+                "/$toGet.json"
+            )
 
-        if ((notRenamed.exists()) && (!renameTo.exists()) && (toGet !in comiclist)) {
-            notRenamed.renameTo(renameTo)
+            if ((notRenamed.exists()) && (!renameTo.exists()) && (toGet !in comicList)) {
+                notRenamed.renameTo(renameTo)
+            }
         }
 
-        if ((state == 0) && (!File(downloadLocation, "$address$toGet.png").exists())) {
+        if ((state == 0) && (!File(downloadLocation, "$toGet.png").exists())) {
             val imageUrl = downloadedComic.imgUrl
-            val refidIMG = download(
+            val refIdImg = download(
                 imageUrl,
                 "$toGet.png",
                 "png"
             )
-            downloadrefidlist[refidIMG] = toGet
-            imgRefidlist[refidIMG] = toGet
+            downloadRefIdList[refIdImg] = toGet
+            imgRefIdList[refIdImg] = toGet
         }
         latestComicNumber = toGet
         return true
@@ -259,25 +255,25 @@ class MainActivity : AppCompatActivity() {
 
         val imageUrl = downloadedComic.imgUrl
 
-        if (!File(downloadLocation, "$address$toGet.png").exists()) {
-            val refidIMG = download(
+        if (!File(downloadLocation, "$toGet.png").exists()) {
+            val refIdImg = download(
                 imageUrl,
                 "$toGet.png",
                 "png"
             )
-            downloadrefidlist.remove(referenceId)
-            downloadrefidlist[refidIMG] = toGet
-            imgRefidlist[refidIMG] = toGet
+            downloadRefIdList.remove(referenceId)
+            downloadRefIdList[refIdImg] = toGet
+            imgRefIdList[refIdImg] = toGet
         }
         return true
     }
 
     private fun handleImage(referenceId: Long): Boolean {
-        val toGet: Int = imgRefidlist[referenceId]!!
+        val toGet: Int = imgRefIdList[referenceId]!!
 
-        imgRefidlist.remove(referenceId)
-        downloadrefidlist.remove(referenceId)
-        comiclist.add(toGet)
+        imgRefIdList.remove(referenceId)
+        downloadRefIdList.remove(referenceId)
+        comicList.add(toGet)
 
         return true
     }
@@ -343,20 +339,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun getComic(toGet: Int): Boolean {
         // Check if in list already:
-        return when ((toGet in comiclist) && legalnumber(toGet)) {
+        return when ((toGet in comicList) && legalNumber(toGet)) {
             true -> true
             false -> return when (toGet == 0 || toGet == -1) {
-                true -> downloadLatest()
-                false -> return when ((toGet in comiclist) && legalnumber(toGet)) {
+                true -> downloadLatest(toGet)
+                false -> return when ((toGet in comicList) && legalNumber(toGet)) {
                     true -> true
-                    false -> return when (!File(downloadLocation, "$address$toGet.json").exists()) {
+                    false -> return when (!File(downloadLocation, "$toGet.json").exists()) {
                         true -> downloadJson(toGet)
                         false -> return when (!File(
                             downloadLocation,
-                            "$address$toGet.png"
+                            "$toGet.png"
                         ).exists()) {
                             true -> downloadImage(toGet)
-                            false -> comiclist.add(toGet)
+                            false -> comicList.add(toGet)
                         }
                     }
                 }
@@ -364,42 +360,45 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun downloadLatest(): Boolean {
+    private fun downloadLatest(toGet: Int): Boolean {
         val latest = File(
             downloadLocation,
-            "/ComicViewer/latest.json"
+            "latest.json"
         )
-        if (latest.exists())
-            latest.delete()
+        latest.absoluteFile.delete()
+        if (latest.exists()){
+            latest.absoluteFile.delete()
+        }
 
-        val refidJson = download("https://xkcd.com/info.0.json", "latest.json", "txt")
+        val refIdJson = download("https://xkcd.com/info.0.json", "latest.json", "txt")
 
-        downloadrefidlist[refidJson] = 0
-        jsonRefidlist[refidJson] = 0
+        downloadRefIdList[refIdJson] = toGet
+        jsonRefIdList[refIdJson] = toGet
+
         return false
     }
 
     private fun downloadJson(toGet: Int): Boolean {
-        val refidJson = download("https://xkcd.com/$toGet/info.0.json", "$toGet.json", "txt")
+        val refIdJson = download("https://xkcd.com/$toGet/info.0.json", "$toGet.json", "txt")
 
-        downloadrefidlist[refidJson] = toGet
-        jsonRefidlist[refidJson] = toGet
+        downloadRefIdList[refIdJson] = toGet
+        jsonRefIdList[refIdJson] = toGet
         return false
     }
 
     private fun downloadImage(toGet: Int): Boolean {
-        val refidIMG = download(
+        val refIdImg = download(
             loadJson("$toGet.json").imgUrl, "$toGet.png", "png"
         )
 
-        downloadrefidlist[refidIMG] = toGet
-        imgRefidlist[refidIMG] = toGet
+        downloadRefIdList[refIdImg] = toGet
+        imgRefIdList[refIdImg] = toGet
         return false
     }
 
-    private fun downloadFavourites(favouritecomiclist: MutableList<Int>) {
-        if (favouritecomiclist.isNotEmpty()) {
-            val iterator = favouritecomiclist.listIterator()
+    private fun downloadFavourites(favouriteComicList: MutableList<Int>) {
+        if (favouriteComicList.isNotEmpty()) {
+            val iterator = favouriteComicList.listIterator()
             for (comicNumber in iterator) {
                 getComic(comicNumber)
             }
@@ -407,16 +406,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     /*
-    load preferences, comiclist and favourites
+    load preferences, comicList and favourites
      */
     private fun loadPrefs() {
         val prefs = getSharedPreferences(sharedPrefs, Context.MODE_PRIVATE)
         if ((prefs.contains("initialized")) && (prefs.getBoolean("initialized", false))) {
             latestComicNumber = prefs.getInt("latestComicNumber", latestComicNumber)
             currentComicNumber = prefs.getInt("currentComicNumber", currentComicNumber)
-            comiclist = comiclist.union(loadlist("comiclist.json")).toMutableList()
-            favouritecomiclist =
-                favouritecomiclist.union(loadlist("favouritecomiclist.json")).toMutableList()
+
+            if(File(downloadLocation, "comicList.json").exists()){
+                comicList = comicList.union(loadList("comicList.json")).toMutableList()
+            }else{
+                Toast.makeText(
+                    applicationContext,
+                    "Comic list not found. No Comics in list.",
+                    Toast.LENGTH_LONG
+                ).show()
+                d("error","ComicList file was not found.")
+            }
+
+            if(File(downloadLocation, "favouriteComicList.json").exists()){
+                favouriteComicList = favouriteComicList.union(loadList("favouriteComicList.json")).toMutableList()
+            }else{
+                Toast.makeText(
+                    applicationContext,
+                    "Favourite Comic list not found. No Comics in list.",
+                    Toast.LENGTH_LONG
+                ).show()
+                d("error","ComicList file was not found.")
+            }
+
             Toast.makeText(
                 applicationContext,
                 resources.getString(R.string.preferences_loaded),
@@ -434,7 +453,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /*
-    save preferences, comiclist and favourites
+    save preferences, comicList and favourites
      */
     private fun saveState() {
         val prefs = getSharedPreferences(sharedPrefs, Context.MODE_PRIVATE)
@@ -444,15 +463,15 @@ class MainActivity : AppCompatActivity() {
         editor.putBoolean("initialized", true)
         editor.apply()
         Toast.makeText(applicationContext, "Preferences Saved", Toast.LENGTH_SHORT).show()
-        savelist(comiclist, "comiclist.json")
-        savelist(
-            favouritecomiclist,
-            "favouritecomiclist.json"
+        saveList(comicList, "comicList.json")
+        saveList(
+            favouriteComicList,
+            "favouriteComicList.json"
         )
     }
 
     private fun updateComic(number: Int) {
-        if (legalnumber(number)) {
+        if (legalNumber(number)) {
             val result = getComic(number)
             if (result) {
                 d("updateComic", "updating number: $number")
@@ -460,14 +479,14 @@ class MainActivity : AppCompatActivity() {
                 updateGraphics(currentComicNumber)
             }
             //else if (!result){
-            //while (number in imgRefidlist.values){}
+            //while (number in imgRefIdList.values){}
             //    currentComicNumber = waitingToUpdateTo
             //    updateGraphics(currentComicNumber)
             //}
         }
         d("updateComic", "number: $number")
-        d("updateComic", "comiclist: $comiclist")
-        d("updateComic", "favouritecomiclist: $favouritecomiclist")
+        d("updateComic", "comicList: $comicList")
+        d("updateComic", "favouriteComicList: $favouriteComicList")
         d("updateComic", "latest: $latestComicNumber")
     }
 
@@ -475,23 +494,26 @@ class MainActivity : AppCompatActivity() {
     update display and text
      */
     private fun updateGraphics(number: Int) {
-        if (File(downloadLocation, "$address$number.json").exists()) {
+        if (File(downloadLocation, "$number.json").exists()) {
             val comic: Comic = loadJson("$number.json")
             displayDescription.text = comic.altText
             displayTitle.text = comic.title
+            val s = SpannableStringBuilder().bold { append(resources.getString(R.string.date)) }.append(" ${comic.day}.${comic.month}.${comic.year}" )
+            dateView.text = s
         } else {
             displayDescription.text = resources.getString(R.string.comic_not_found)
             displayTitle.text = resources.getString(R.string.unknown)
+            dateView.text = ""
         }
 
         val displayImage = findViewById<ImageView>(R.id.displayImage)
-        if (File(downloadLocation, "$address$number.png").exists())
+        if (File(downloadLocation, "$number.png").exists())
             displayImage.setImageBitmap(
                 BitmapFactory.decodeStream(
                     FileInputStream(
                         File(
                             downloadLocation,
-                            "$address$number.png"
+                            "$number.png"
                         ).absolutePath
                     )
                 )
@@ -506,40 +528,40 @@ class MainActivity : AppCompatActivity() {
     returns true if legal number,
     false if not
      */
-    private fun legalnumber(number: Int): Boolean {
+    private fun legalNumber(number: Int): Boolean {
         return when ((firstComicNumber <= number) && (number <= latestComicNumber)) {
             true -> true
             false -> false
         }
     }
 
-    private fun download(url: String, filename: String, filetype: String): Long {
-        val downloadManagervar =
+    private fun download(url: String, filename: String, fileType: String): Long {
+        val downloadManagerVar =
             getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val downloadUri = Uri.parse(url)
         val request = DownloadManager.Request(downloadUri)
         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
         request.setAllowedOverRoaming(false)
-        request.setTitle(resources.getString(R.string.comic_viewer_downloading_comic) + filetype)
-        request.setDescription(resources.getString(R.string.comic_viewer_downloading_comic) + filetype)
+        request.setTitle(resources.getString(R.string.comic_viewer_downloading_comic) + fileType)
+        request.setDescription(resources.getString(R.string.comic_viewer_downloading_comic) + fileType)
         request.setDestinationInExternalFilesDir(
             this,
             DIRECTORY_DOWNLOADS,
-            address + filename
+            filename
         )
-        return downloadManagervar.enqueue(request)
+        return downloadManagerVar.enqueue(request)
     }
 
     @Throws(IOException::class)
-    private fun savelist(comiclist: List<Int>, filename: String) {
-        val text = comiclist.toString()
+    private fun saveList(comicList: List<Int>, filename: String) {
+        val text = comicList.toString()
 
         var fos: FileOutputStream? = null
         try {
             fos = FileOutputStream(
                 File(
                     downloadLocation,
-                    address + filename
+                    filename
                 )
             )
 
@@ -558,23 +580,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Throws(IOException::class)
-    private fun loadlist(filename: String): MutableList<Int> {
+    private fun loadList(filename: String): MutableList<Int> {
         var fis: FileInputStream? = null
 
         try {
             fis = FileInputStream(
                 File(
                     downloadLocation,
-                    address + filename
+                    filename
                 )
             )
             val input = BufferedReader(InputStreamReader(fis)).readText()
-            val inititalInput = input.removeSurrounding("[", "]")
-            if (inititalInput.isEmpty()) {
+            val initialInput = input.removeSurrounding("[", "]")
+            if (initialInput.isEmpty()) {
                 return mutableListOf()
             }
 
-            return inititalInput.split(",").map { it.trim() }.map { it.toInt() }.toMutableList()
+            return initialInput.split(",").map { it.trim() }.map { it.toInt() }.toMutableList()
         } finally {
             if (fis != null) {
                 try {
@@ -591,7 +613,7 @@ class MainActivity : AppCompatActivity() {
         val fis = FileInputStream(
             File(
                 downloadLocation,
-                address + filename
+                filename
             )
         )
 
@@ -601,6 +623,9 @@ class MainActivity : AppCompatActivity() {
             var title = ""
             var altText = ""
             var urlPath = ""
+            var year = -1
+            var month = -1
+            var day = -1
 
             reader.beginObject()
             while (reader.hasNext()) {
@@ -609,13 +634,16 @@ class MainActivity : AppCompatActivity() {
                     "alt" -> altText = reader.nextString()
                     "num" -> number = reader.nextInt()
                     "title" -> title = reader.nextString()
+                    "year" -> year = reader.nextInt()
+                    "month" -> month = reader.nextInt()
+                    "day" -> day = reader.nextInt()
                     else -> reader.skipValue()
                 }
             }
 
             reader.endObject()
             reader.close()
-            return Comic(number, title, altText, urlPath, "")
+            return Comic(number, title, altText, urlPath, "",year,month,day)
 
         }
     }
