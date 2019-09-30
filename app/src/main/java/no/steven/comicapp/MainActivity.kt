@@ -61,6 +61,8 @@ class MainActivity : AppCompatActivity() {
 
     private var sharedPrefs = "Steven's a Comic App"
 
+    private var showComicNumber = false
+
     private lateinit var downloadLocation: File
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -122,6 +124,16 @@ class MainActivity : AppCompatActivity() {
 
         buttonPrevious.setOnClickListener {
             updateComic(currentComicNumber - 1)
+        }
+
+        buttonTitle.setOnClickListener {
+            if(showComicNumber){
+                showComicNumber = false
+                updateComic(currentComicNumber)
+            } else {
+                showComicNumber = true
+                updateComic(currentComicNumber)
+            }
         }
 
     }
@@ -451,12 +463,18 @@ class MainActivity : AppCompatActivity() {
         if (File(downloadLocation, "$number.json").exists()) {
             val comic: Comic = loadJson("$number.json")
             displayDescription.text = comic.altText
-            displayTitle.text = comic.title
+            buttonTitle.text = comic.title
+            if(showComicNumber){
+                buttonTitle.text = "${comic.number}: ${comic.title}"
+            } else {
+                buttonTitle.text = comic.title
+            }
+
             val s = SpannableStringBuilder().bold { append(resources.getString(R.string.date)) }.append(" ${comic.day}.${comic.month}.${comic.year}" )
             dateView.text = s
         } else {
             displayDescription.text = resources.getString(R.string.comic_not_found)
-            displayTitle.text = resources.getString(R.string.unknown)
+            buttonTitle.text = resources.getString(R.string.unknown)
             dateView.text = ""
         }
 
