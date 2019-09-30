@@ -6,8 +6,7 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:context="no.steven.comicapp.MainActivity"
-        tools:layout_editor_absoluteY="56dp"
-        >
+        tools:layout_editor_absoluteY="56dp" >
 
     <LinearLayout
             android:id="@+id/buttonBox"
@@ -34,31 +33,6 @@
                 android:textStyle="bold" />
 
         <Button
-                android:id="@+id/buttonPrevious"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                android:layout_weight="1"
-                android:text="@string/previous"
-                android:textAllCaps="true"
-                android:textColor="@android:color/black"
-                android:textStyle="bold" />
-
-        <Button
-                android:id="@+id/buttonNext"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                android:layout_marginBottom="0dp"
-                android:layout_weight="1"
-                android:text="@string/next"
-                android:textAllCaps="true"
-                android:textColor="@android:color/black"
-                android:textStyle="bold" />
-
-        <Button
                 android:id="@+id/buttonLast"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
@@ -74,7 +48,7 @@
     </LinearLayout>
 
     <androidx.viewpager.widget.ViewPager
-            android:id="@+id/viewpager"
+            android:id="@+id/viewPager"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_gravity="center"

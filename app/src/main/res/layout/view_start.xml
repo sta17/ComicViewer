@@ -3,35 +3,17 @@
         android:orientation="vertical" android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <TextView
-            android:id="@+id/displayTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="0dp"
-            android:layout_marginLeft="0dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginEnd="0dp"
-            android:layout_marginRight="0dp"
-            android:gravity="center|top"
-            android:text="@string/title"
-            android:textColor="@android:color/black"
-            android:textSize="24sp" />
-
     <ImageView
             android:id="@+id/displayImage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/displayDescription"
-            android:layout_below="@+id/displayTitle"
+            android:layout_below="@+id/buttonTitle"
             android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
+            android:layout_gravity="center|start|center_horizontal|fill_horizontal|end"
             android:layout_marginStart="0dp"
             android:layout_marginLeft="0dp"
             android:layout_marginTop="0dp"
-            android:layout_marginEnd="0dp"
             android:layout_marginRight="0dp"
             android:layout_marginBottom="0dp"
             android:contentDescription="@string/comic_image" />
@@ -40,9 +22,9 @@
             android:id="@+id/displayDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/dateView"
             android:layout_alignParentStart="true"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
             android:layout_marginStart="0dp"
             android:layout_marginLeft="0dp"
             android:layout_marginEnd="0dp"
@@ -53,5 +35,36 @@
             android:textAllCaps="false"
             android:textColor="@android:color/black"
             android:textSize="18sp" />
+
+    <Button
+            android:id="@+id/buttonTitle"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|top|end"
+            android:gravity="center"
+            android:text="@string/title"
+            android:textSize="24sp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="0dp" />
+
+    <TextView
+            android:id="@+id/dateView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="0dp"
+            android:layout_marginBottom="0dp"
+            android:gravity="center"
+            android:text="@string/date"
+            android:textAllCaps="false"
+            android:textStyle="bold" />
 
 </RelativeLayout>
