@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context="no.steven.comicapp.MainActivity"
+        tools:layout_editor_absoluteY="56dp"
+        tools:showIn="@layout/activity_main">
+
+    <LinearLayout
+            android:id="@+id/buttonBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:theme="@style/AppTheme.ButtonTheme">
+
+        <Button
+                android:id="@+id/buttonFirst"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginBottom="0dp"
+                android:layout_weight="1"
+                android:text="@string/first"
+                android:textAllCaps="true"
+                android:textStyle="bold" />
+
+        <Button
+                android:id="@+id/buttonPrevious"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:layout_weight="1"
+                android:text="@string/previous"
+                android:textAllCaps="true"
+                android:textStyle="bold" />
+
+        <Button
+                android:id="@+id/buttonNext"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:layout_marginBottom="0dp"
+                android:layout_weight="1"
+                android:text="@string/next"
+                android:textAllCaps="true"
+                android:textStyle="bold" />
+
+        <Button
+                android:id="@+id/buttonLast"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginBottom="0dp"
+                android:layout_weight="1"
+                android:text="@string/last"
+                android:textAllCaps="true"
+                android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/comicDisplay"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonBox">
+
+        <Button
+                android:id="@+id/buttonTitle"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|top|end"
+                android:gravity="center"
+                android:text="@string/title"
+                android:textSize="24sp" />
+
+        <ImageView
+                android:id="@+id/displayImage"
+                android:layout_width="match_parent"
+                android:layout_height="356dp"
+                android:layout_gravity="center|start|center_horizontal|fill_horizontal|end"
+                android:contentDescription="@string/comic_image"
+                app:srcCompat="@drawable/ic_launcher_foreground" />
+
+        <TextView
+                android:id="@+id/displayDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start|end"
+                android:gravity="center|top"
+                android:text="@string/description"
+                android:textAllCaps="false"
+                android:textSize="18sp" />
+
+        <TextView
+                android:id="@+id/dateView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/date"
+                android:textAllCaps="false"
+                android:textStyle="bold" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

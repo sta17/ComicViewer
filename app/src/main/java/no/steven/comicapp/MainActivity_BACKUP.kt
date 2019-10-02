@@ -43,7 +43,7 @@ import java.io.*
 //TODO: make most of the comic pages cleanable as junk except for favourites.
 //TODO: set the page update to happen upon comic image download, immediately, rather then second button push.
 //BUG: update image on button click. Handle download done, update now and clean download handling code.
-class MainActivity : AppCompatActivity() {
+class MainActivity_BACKUP : AppCompatActivity() {
 
     private var currentComicNumber = 0
     private var latestComicNumber = 0
