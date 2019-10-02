@@ -6,7 +6,7 @@
         <item name="colorControlActivated">@android:color/black</item>
         <item name="colorControlHighlight">@android:color/darker_gray</item>
         <item name="android:textColor">@android:color/black</item>
-        <item name="android:background">@android:color/background_light</item>
+        <item name="background">@android:color/background_light</item>
     </style>
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
@@ -18,13 +18,12 @@
     <style name="AppTheme.DialogTheme" parent="AppTheme">
         <item name="android:windowFullscreen">true</item>
         <item name="android:gravity">center</item>
-        <item name="android:buttonBarNegativeButtonStyle">@style/AppTheme.ButtonTheme</item>
+        <item name="buttonStyle">@style/AppTheme.ButtonTheme</item>
     </style>
 
     <style name="AppTheme.ButtonTheme" parent="AppTheme">
         <item name="android:gravity">center</item>
-        <item name="android:background">@drawable/border_button</item>
+        <item name="background">@drawable/border_button</item>
     </style>
-
 
 </resources>

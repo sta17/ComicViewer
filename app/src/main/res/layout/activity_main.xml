@@ -16,6 +16,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/colorWhite"
                 android:minHeight="?attr/actionBarSize"
                 android:theme="@style/AppTheme.NoActionBar"
                 app:contentInsetStart="10dp"
@@ -23,6 +24,6 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/content_main"/>
+    <include layout="@layout/content_main_alt"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
