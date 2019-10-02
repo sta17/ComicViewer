@@ -26,7 +26,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.text.bold
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.content_main.*
+import androidx.viewpager.widget.ViewPager
+import kotlinx.android.synthetic.main.content_main_alt.*
 import java.io.*
 
 // https://github.com/shortcut/android-coding-assignment - task.
@@ -62,9 +63,9 @@ class MainActivity : AppCompatActivity() {
 
     private var sharedPrefs = "Steven's a Comic App"
 
-    private var showComicNumber = false
-
     private lateinit var downloadLocation: File
+
+    internal lateinit var viewpager : ViewPager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,6 +76,10 @@ class MainActivity : AppCompatActivity() {
 
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         downloadLocation = this.getExternalFilesDir(DIRECTORY_DOWNLOADS)!!
+
+        viewpager = findViewById(R.id.viewpager)
+        val adapter = ViewPagerAdapter(this,resources,downloadLocation,latestComicNumber)
+        viewpager.adapter = adapter
 
         if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) {
             if (PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
@@ -116,24 +121,6 @@ class MainActivity : AppCompatActivity() {
 
         buttonLast.setOnClickListener {
             updateComic(latestComicNumber)
-        }
-
-        buttonNext.setOnClickListener {
-            updateComic(currentComicNumber + 1)
-        }
-
-        buttonPrevious.setOnClickListener {
-            updateComic(currentComicNumber - 1)
-        }
-
-        buttonTitle.setOnClickListener {
-            if(showComicNumber){
-                showComicNumber = false
-                updateComic(currentComicNumber)
-            } else {
-                showComicNumber = true
-                updateComic(currentComicNumber)
-            }
         }
 
     }
@@ -442,7 +429,7 @@ class MainActivity : AppCompatActivity() {
             if (result) {
                 d("updateComic", "updating number: $number")
                 currentComicNumber = number
-                updateGraphics(currentComicNumber)
+                viewpager.currentItem = currentComicNumber
             }
             //else if (!result){
             //while (number in imgRefIdList.values){}
@@ -454,45 +441,6 @@ class MainActivity : AppCompatActivity() {
         d("updateComic", "comicList: $comicList")
         d("updateComic", "favouriteComicList: $favouriteComicList")
         d("updateComic", "latest: $latestComicNumber")
-    }
-
-    /*
-    update display and text
-     */
-    private fun updateGraphics(number: Int) {
-        if (File(downloadLocation, "$number.json").exists()) {
-            val comic: Comic = loadJson("$number.json")
-            displayDescription.text = comic.altText
-            buttonTitle.text = comic.title
-            if(showComicNumber){
-                buttonTitle.text = "${comic.number}: ${comic.title}"
-            } else {
-                buttonTitle.text = comic.title
-            }
-
-            val s = SpannableStringBuilder().bold { append(resources.getString(R.string.date)) }.append(" ${comic.day}.${comic.month}.${comic.year}" )
-            dateView.text = s
-        } else {
-            displayDescription.text = resources.getString(R.string.comic_not_found)
-            buttonTitle.text = resources.getString(R.string.unknown)
-            dateView.text = ""
-        }
-
-        val displayImage = findViewById<ImageView>(R.id.displayImage)
-        if (File(downloadLocation, "$number.png").exists())
-            displayImage.setImageBitmap(
-                BitmapFactory.decodeStream(
-                    FileInputStream(
-                        File(
-                            downloadLocation,
-                            "$number.png"
-                        ).absolutePath
-                    )
-                )
-            )
-        else
-            displayImage.setImageDrawable(R.drawable.ic_launcher_foreground.toDrawable())
-        this.invalidateOptionsMenu()
     }
 
     /*
@@ -619,18 +567,5 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
-
-    class ScreenSlidePageFragment : Fragment() {
-
-        override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View = inflater.inflate(R.layout.viewpage, container, false)
-    }
-
-
-
-
 }
 

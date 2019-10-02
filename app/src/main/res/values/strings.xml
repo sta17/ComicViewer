@@ -1,10 +1,8 @@
 <resources>
     <string name="app_name">A Comic App</string>
-    <string name="next">Next</string>
     <string name="favourite">Favourite</string>
     <string name="last">Latest</string>
     <string name="first">First</string>
-    <string name="previous">Previous</string>
     <string name="comic_image">Comic Image</string>
     <string name="description">Description</string>
     <string name="title">Title</string>
