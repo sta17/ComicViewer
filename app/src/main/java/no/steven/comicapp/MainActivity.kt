@@ -1,7 +1,7 @@
 package no.steven.comicapp
 
 import android.Manifest
-import androidx.appcompat.app.AlertDialog
+import android.app.AlertDialog
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -17,7 +17,8 @@ import android.text.InputType.TYPE_CLASS_NUMBER
 import android.text.SpannableStringBuilder
 import android.util.JsonReader
 import android.util.Log.d
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
@@ -25,7 +26,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.text.bold
-import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.content_main.*
 import java.io.*
 
@@ -39,7 +39,6 @@ import java.io.*
 // https://www.flaticon.com/free-icon/star_149222 - Designed by smashicons from Flaticon - Star
 // https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html - Comic Icon
 // http://romannurik.github.io/AndroidAssetStudio/ - Asset generators
-// https://codingjuction.com/2018/12/13/how-to-make-image-slider-by-view-pager-in-the-android-studio-kotlin/ - sliding/flick viewpager tutorial
 //TODO: make most of the comic pages cleanable as junk except for favourites.
 //TODO: set the page update to happen upon comic image download, immediately, rather then second button push.
 //BUG: update image on button click. Handle download done, update now and clean download handling code.
@@ -75,6 +74,7 @@ class MainActivity : AppCompatActivity() {
 
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         downloadLocation = this.getExternalFilesDir(DIRECTORY_DOWNLOADS)!!
+
 
         if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) {
             if (PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
@@ -620,17 +620,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    class ScreenSlidePageFragment : Fragment() {
-
-        override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View = inflater.inflate(R.layout.viewpage, container, false)
-    }
-
-
-
-
 }
-
