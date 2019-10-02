@@ -55,10 +55,6 @@ class MainActivity : AppCompatActivity() {
     private var imgRefIdList: MutableMap<Long, Int> = mutableMapOf()
     private var jsonRefIdList: MutableMap<Long, Int> = mutableMapOf()
 
-    private val myPermissionsWriteExternalStorage = 1
-    private val myPermissionsReadExternalStorage = 1
-    private val myPermissionsInternet = 1
-
     private var sharedPrefs = "Steven's a Comic App"
 
     private var showComicNumber = false
