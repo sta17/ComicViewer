@@ -8,26 +8,20 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.text.InputType.TYPE_CLASS_NUMBER
-import android.text.SpannableStringBuilder
 import android.util.JsonReader
 import android.util.Log.d
 import android.view.*
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.graphics.drawable.toDrawable
-import androidx.core.text.bold
-import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
-import kotlinx.android.synthetic.main.content_main_alt.*
+import kotlinx.android.synthetic.main.content_main.*
 import java.io.*
 
 // https://github.com/shortcut/android-coding-assignment - task.
@@ -57,15 +51,11 @@ class MainActivity : AppCompatActivity() {
     private var imgRefIdList: MutableMap<Long, Int> = mutableMapOf()
     private var jsonRefIdList: MutableMap<Long, Int> = mutableMapOf()
 
-    private val myPermissionsWriteExternalStorage = 1
-    private val myPermissionsReadExternalStorage = 1
-    private val myPermissionsInternet = 1
-
     private var sharedPrefs = "Steven's a Comic App"
 
     private lateinit var downloadLocation: File
 
-    internal lateinit var viewpager : ViewPager
+    private lateinit var viewpager : ViewPager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
