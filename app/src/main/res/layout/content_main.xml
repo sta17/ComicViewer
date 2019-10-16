@@ -82,6 +82,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -98,12 +100,13 @@
                     android:text="@string/title"
                     android:textSize="24sp" />
 
-            <ImageView
-                    android:id="@+id/displayImage"
+            <com.github.chrisbanes.photoview.PhotoView
+                    android:id="@+id/photo_view"
                     android:layout_width="match_parent"
-                    android:layout_height="356dp"
-                    android:layout_gravity="center|start|center_horizontal|fill_horizontal|end"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
                     android:contentDescription="@string/comic_image"
+                    android:scaleType="fitCenter"
                     app:srcCompat="@drawable/ic_launcher_foreground" />
 
             <TextView
@@ -112,6 +115,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|start|end"
                     android:gravity="center|top"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
                     android:text="@string/description"
                     android:textAllCaps="false"
                     android:textSize="18sp" />
@@ -122,6 +127,7 @@
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:gravity="center"
+                    android:paddingBottom="10dp"
                     android:text="@string/date"
                     android:textAllCaps="false"
                     android:textStyle="bold" />

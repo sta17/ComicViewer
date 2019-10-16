@@ -9,6 +9,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -19,6 +21,8 @@ import android.util.JsonReader
 import android.util.Log.d
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
@@ -26,6 +30,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.text.bold
+import com.github.chrisbanes.photoview.PhotoView
+import com.github.chrisbanes.photoview.PhotoViewAttacher
 import kotlinx.android.synthetic.main.content_main.*
 import java.io.*
 
@@ -39,6 +45,7 @@ import java.io.*
 // https://www.flaticon.com/free-icon/star_149222 - Designed by smashicons from Flaticon - Star
 // https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html - Comic Icon
 // http://romannurik.github.io/AndroidAssetStudio/ - Asset generators
+// https://www.android-examples.com/add-pinch-zoom-multitouch-effect-imageview-android/ - zoom tutorial
 //TODO: make most of the comic pages cleanable as junk except for favourites.
 //TODO: set the page update to happen upon comic image download, immediately, rather then second button push.
 //BUG: update image on button click. Handle download done, update now and clean download handling code.
@@ -61,6 +68,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var downloadLocation: File
 
+    private lateinit var photoView: PhotoView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -70,7 +79,7 @@ class MainActivity : AppCompatActivity() {
 
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         downloadLocation = this.getExternalFilesDir(DIRECTORY_DOWNLOADS)!!
-
+        photoView = findViewById(R.id.photo_view)
 
         if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) {
             if (PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
@@ -473,21 +482,15 @@ class MainActivity : AppCompatActivity() {
             buttonTitle.text = resources.getString(R.string.unknown)
             dateView.text = ""
         }
-
-        val displayImage = findViewById<ImageView>(R.id.displayImage)
         if (File(downloadLocation, "$number.png").exists())
-            displayImage.setImageBitmap(
-                BitmapFactory.decodeStream(
-                    FileInputStream(
-                        File(
-                            downloadLocation,
-                            "$number.png"
-                        ).absolutePath
-                    )
-                )
-            )
+        {
+            photoView.setImageBitmap(BitmapFactory.decodeFile(File(
+                downloadLocation,
+                "$number.png"
+            ).path))
+        }
         else
-            displayImage.setImageDrawable(R.drawable.ic_launcher_foreground.toDrawable())
+            photoView.setImageResource(R.drawable.ic_launcher_foreground)
         this.invalidateOptionsMenu()
     }
 
