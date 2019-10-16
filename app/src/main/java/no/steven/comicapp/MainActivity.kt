@@ -45,7 +45,7 @@ import java.io.*
 // https://www.flaticon.com/free-icon/star_149222 - Designed by smashicons from Flaticon - Star
 // https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html - Comic Icon
 // http://romannurik.github.io/AndroidAssetStudio/ - Asset generators
-// https://www.android-examples.com/add-pinch-zoom-multitouch-effect-imageview-android/ - zoom tutorial
+// https://github.com/chrisbanes/PhotoView
 //TODO: make most of the comic pages cleanable as junk except for favourites.
 //TODO: set the page update to happen upon comic image download, immediately, rather then second button push.
 //BUG: update image on button click. Handle download done, update now and clean download handling code.
@@ -193,10 +193,11 @@ class MainActivity : AppCompatActivity() {
                 .setTitle("Credits")
                 .setMessage(
                     "xkcd by Randall Munroe at xkcd.com"
-                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "Magnifying glass/Search button designed by Freepik from Flaticon "
-                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "Star/Favourite button designed by smashicons from Flaticon"
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "Magnifying glass/Search button designed by Freepik from Flaticon."
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "Star/Favourite button designed by smashicons from Flaticon."
                             + System.getProperty("line.separator") + System.getProperty("line.separator") + "App Icon made using romannurik.github.io/AndroidAssetStudio/"
-                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "App by Steven Aanetsen"
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "Zoom feature made using github.com/chrisbanes/PhotoView library."
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "App by Steven Aanetsen."
                 )
                 .setIcon(R.mipmap.ic_launcher)
                 .setCancelable(true)
