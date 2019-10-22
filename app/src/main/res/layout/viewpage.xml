@@ -1,16 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical" android:layout_width="match_parent"
-        android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
+
+    <Button
+            android:id="@+id/buttonTitle"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|top|end"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="0dp"
+            android:gravity="center"
+            android:text="@string/title"
+            android:textSize="24sp" />
 
     <ImageView
             android:id="@+id/displayImage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/displayDescription"
-            android:layout_below="@+id/buttonTitle"
-            android:layout_alignParentStart="true"
             android:layout_gravity="center|start|center_horizontal|fill_horizontal|end"
             android:layout_marginStart="0dp"
             android:layout_marginLeft="0dp"
@@ -23,9 +34,6 @@
             android:id="@+id/displayDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/dateView"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
             android:layout_marginStart="0dp"
             android:layout_marginLeft="0dp"
             android:layout_marginEnd="0dp"
@@ -37,29 +45,10 @@
             android:textColor="@android:color/black"
             android:textSize="18sp" />
 
-    <Button
-            android:id="@+id/buttonTitle"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start|top|end"
-            android:gravity="center"
-            android:text="@string/title"
-            android:textSize="24sp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="0dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginEnd="0dp" />
-
     <TextView
             android:id="@+id/dateView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
             android:layout_marginStart="0dp"
             android:layout_marginEnd="0dp"
             android:layout_marginBottom="0dp"
@@ -68,4 +57,4 @@
             android:textAllCaps="false"
             android:textStyle="bold" />
 
-</RelativeLayout>
+</LinearLayout>

@@ -8,21 +8,31 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.text.InputType.TYPE_CLASS_NUMBER
+import android.text.SpannableStringBuilder
 import android.util.JsonReader
 import android.util.Log.d
 import android.view.*
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.text.bold
+import androidx.core.view.get
 import androidx.viewpager.widget.ViewPager
 import kotlinx.android.synthetic.main.content_main.*
 import java.io.*
+import androidx.viewpager.widget.ViewPager.OnPageChangeListener
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 // https://github.com/shortcut/android-coding-assignment - task.
 // https://www.journaldev.com/10096/android-viewpager-example-tutorial - viewpager tutorial.
@@ -67,10 +77,6 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         downloadLocation = this.getExternalFilesDir(DIRECTORY_DOWNLOADS)!!
 
-        viewpager = findViewById(R.id.viewpager)
-        val adapter = ViewPagerAdapter(this,resources,downloadLocation,latestComicNumber)
-        viewpager.adapter = adapter
-
         if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) {
             if (PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
                     this,
@@ -103,7 +109,29 @@ class MainActivity : AppCompatActivity() {
         loadPrefs() // get the preferences
         getComic(-1) // get latest
         downloadFavourites(favouriteComicList) // get favorites
-        updateComic(currentComicNumber) // get the last viewed
+        //updateComic(currentComicNumber) // get the last viewed
+
+        viewpager = findViewById(R.id.viewpager)
+        val adapter = ViewPagerAdapter(this,resources,downloadLocation,latestComicNumber,firstComicNumber,comicList,downloadRefIdList,imgRefIdList,jsonRefIdList)
+        viewpager.adapter = adapter
+
+        viewpager.addOnPageChangeListener(object : OnPageChangeListener {
+            override fun onPageScrollStateChanged(state: Int) {}
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
+                // https://developer.android.com/reference/androidx/viewpager/widget/ViewPager.OnPageChangeListener.html
+                // https://stackoverflow.com/questions/11293300/determine-when-a-viewpager-changes-pages
+                // https://stackoverflow.com/questions/8117523/how-do-you-get-the-current-page-number-of-a-viewpager-for-android
+                // TODO: Start here figure out change.
+            }
+
+            override fun onPageSelected(position: Int) {
+                // Check if this is the page you want.
+            }
+        })
 
         buttonFirst.setOnClickListener {
             updateComic(1)
@@ -266,6 +294,10 @@ class MainActivity : AppCompatActivity() {
         downloadRefIdList.remove(referenceId)
         comicList.add(toGet)
 
+        //var view = viewpager[toGet]
+        //do stuff
+        //viewpager[toGet] = view // ERROR NOT POSSIBLE
+
         return true
     }
 
@@ -294,8 +326,8 @@ class MainActivity : AppCompatActivity() {
                             downloadLocation,
                             "$toGet.png"
                         ).exists()) {
-                            true -> downloadImage(toGet)
-                            false -> comicList.add(toGet)
+                            false -> downloadImage(toGet)
+                            true -> comicList.add(toGet)
                         }
                     }
                 }
@@ -420,6 +452,8 @@ class MainActivity : AppCompatActivity() {
                 d("updateComic", "updating number: $number")
                 currentComicNumber = number
                 viewpager.currentItem = currentComicNumber
+                //viewpager.invalidate()
+                viewpager.postInvalidate()
             }
             //else if (!result){
             //while (number in imgRefIdList.values){}
