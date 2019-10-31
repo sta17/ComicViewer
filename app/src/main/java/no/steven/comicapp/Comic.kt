@@ -10,3 +10,4 @@ data class Comic (
     val month: Int,
     val day: Int
 )
+

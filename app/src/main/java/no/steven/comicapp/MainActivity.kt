@@ -8,30 +8,22 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.text.InputType.TYPE_CLASS_NUMBER
-import android.text.SpannableStringBuilder
 import android.util.JsonReader
 import android.util.Log.d
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.graphics.drawable.toDrawable
-import androidx.core.text.bold
-import androidx.core.view.get
 import androidx.viewpager.widget.ViewPager
 import kotlinx.android.synthetic.main.content_main.*
 import java.io.*
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
+import no.steven.comicapp.fragment_handling.ManagerFragment
 
 
 // https://github.com/shortcut/android-coding-assignment - task.
@@ -45,6 +37,8 @@ import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 // https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html - Comic Icon
 // http://romannurik.github.io/AndroidAssetStudio/ - Asset generators
 // https://codingjuction.com/2018/12/13/how-to-make-image-slider-by-view-pager-in-the-android-studio-kotlin/ - sliding/flick viewpager tutorial
+// https://github.com/thedeveloperworldisyours/CommunicatingActivityWithFragmentsTabBar
+// https://thedeveloperworldisyours.com/android/communicating-activity-with-fragments-in-tabbar-2/#sthash.jPZCqJLO.LzcU74z1.dpbs
 //TODO: make most of the comic pages cleanable as junk except for favourites.
 //TODO: set the page update to happen upon comic image download, immediately, rather then second button push.
 //BUG: update image on button click. Handle download done, update now and clean download handling code.
@@ -66,6 +60,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var downloadLocation: File
 
     private lateinit var viewpager : ViewPager
+
+    private lateinit var mManagerFragment: ManagerFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,8 +108,8 @@ class MainActivity : AppCompatActivity() {
         //updateComic(currentComicNumber) // get the last viewed
 
         viewpager = findViewById(R.id.viewpager)
-        val adapter = ViewPagerAdapter(this,resources,downloadLocation,latestComicNumber,firstComicNumber,comicList,downloadRefIdList,imgRefIdList,jsonRefIdList)
-        viewpager.adapter = adapter
+
+        mManagerFragment = ManagerFragment.newInstance(downloadLocation,currentComicNumber)
 
         viewpager.addOnPageChangeListener(object : OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {}
@@ -152,6 +148,7 @@ class MainActivity : AppCompatActivity() {
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         if (currentComicNumber in favouriteComicList) {
             menu!!.findItem(R.id.action_favourite).setIcon(R.drawable.star_filled)
+
         } else {
             menu!!.findItem(R.id.action_favourite).setIcon(R.drawable.star)
         }
@@ -195,8 +192,7 @@ class MainActivity : AppCompatActivity() {
                     "xkcd by Randall Munroe at xkcd.com"
                             + System.getProperty("line.separator") + System.getProperty("line.separator") + "Magnifying glass/Search button designed by Freepik from Flaticon "
                             + System.getProperty("line.separator") + System.getProperty("line.separator") + "Star/Favourite button designed by smashicons from Flaticon"
-                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "App Icon made using romannurik.github.io/AndroidAssetStudio/"
-                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "App by Steven Aanetsen"
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "App by Steven Aanetsen."
                 )
                 .setIcon(R.mipmap.ic_launcher)
                 .setCancelable(true)
@@ -236,7 +232,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleLatest(state: Int): Boolean {
         val downloadedComic =
-            loadJson("latest.json")
+            loadJson("latest.json",downloadLocation)
         val toGet = downloadedComic.number
         latestComicNumber = downloadedComic.number
 
@@ -260,7 +256,9 @@ class MainActivity : AppCompatActivity() {
             val refIdImg = download(
                 imageUrl,
                 "$toGet.png",
-                "png"
+                "png",
+                "Comic Downloader",
+                this
             )
             downloadRefIdList[refIdImg] = toGet
             imgRefIdList[refIdImg] = toGet
@@ -270,7 +268,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleJson(toGet: Int, referenceId: Long): Boolean {
-        val downloadedComic = loadJson("$toGet.json")
+        val downloadedComic = loadJson("$toGet.json",downloadLocation)
 
         val imageUrl = downloadedComic.imgUrl
 
@@ -278,7 +276,9 @@ class MainActivity : AppCompatActivity() {
             val refIdImg = download(
                 imageUrl,
                 "$toGet.png",
-                "png"
+                "png",
+                "Comic Downloader",
+                this
             )
             downloadRefIdList.remove(referenceId)
             downloadRefIdList[refIdImg] = toGet
@@ -298,6 +298,19 @@ class MainActivity : AppCompatActivity() {
         //do stuff
         //viewpager[toGet] = view // ERROR NOT POSSIBLE
 
+        if(toGet == currentComicNumber){
+            if(toGet in favouriteComicList){
+                mManagerFragment.update(toGet,true)
+            }else {
+                mManagerFragment.update(toGet,false)
+            }
+            viewpager.adapter?.notifyDataSetChanged()
+            //var group = viewpager.adapter as ViewPagerAdapter
+            //var view = group.updateGraphics(toGet,viewpager[toGet])
+            //viewpager.removeViewAt(toGet)
+            //viewpager.addView(view,toGet)
+        }
+
         return true
     }
 
@@ -313,62 +326,43 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getComic(toGet: Int): Boolean {
-        // Check if in list already:
-        return when ((toGet in comicList) && legalNumber(toGet)) {
-            true -> true
-            false -> return when (toGet == 0 || toGet == -1) {
-                true -> downloadLatest(toGet)
-                false -> return when ((toGet in comicList) && legalNumber(toGet)) {
-                    true -> true
-                    false -> return when (!File(downloadLocation, "$toGet.json").exists()) {
-                        true -> downloadJson(toGet)
-                        false -> return when (!File(
-                            downloadLocation,
-                            "$toGet.png"
-                        ).exists()) {
-                            false -> downloadImage(toGet)
-                            true -> comicList.add(toGet)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun downloadLatest(toGet: Int): Boolean {
-        val latest = File(
-            downloadLocation,
-            "latest.json"
-        )
-        latest.absoluteFile.delete()
-        if (latest.exists()){
+        if((toGet in comicList) && (firstComicNumber <= toGet) && (toGet <= latestComicNumber)){
+            return true
+        } else if (toGet == 0 || toGet == -1) {
+            val latest = File(
+                downloadLocation,
+                "latest.json"
+            )
             latest.absoluteFile.delete()
+            if (latest.exists()){
+                latest.absoluteFile.delete()
+            }
+
+            val refIdJson = download("https://xkcd.com/info.0.json", "latest.json", "txt","Comic Downloader",this)
+
+            downloadRefIdList[refIdJson] = toGet
+            jsonRefIdList[refIdJson] = toGet
+
+            return false
+
+        } else if (!File(downloadLocation, "$toGet.json").exists())  {
+            val refIdJson = download("https://xkcd.com/$toGet/info.0.json", "$toGet.json", "txt","Comic Downloader", this)
+
+            downloadRefIdList[refIdJson] = toGet
+            jsonRefIdList[refIdJson] = toGet
+            return false
+
+        } else if (!File(downloadLocation, "$toGet.png").exists()) {
+            val refIdImg = download(loadJson("$toGet.json",downloadLocation).imgUrl, "$toGet.png", "png","Comic Downloader", this)
+
+            downloadRefIdList[refIdImg] = toGet
+            imgRefIdList[refIdImg] = toGet
+            return false
+
+        } else {
+            comicList.add(toGet)
+            return true
         }
-
-        val refIdJson = download("https://xkcd.com/info.0.json", "latest.json", "txt")
-
-        downloadRefIdList[refIdJson] = toGet
-        jsonRefIdList[refIdJson] = toGet
-
-        return false
-    }
-
-    private fun downloadJson(toGet: Int): Boolean {
-        val refIdJson = download("https://xkcd.com/$toGet/info.0.json", "$toGet.json", "txt")
-
-        downloadRefIdList[refIdJson] = toGet
-        jsonRefIdList[refIdJson] = toGet
-        return false
-    }
-
-    private fun downloadImage(toGet: Int): Boolean {
-        val refIdImg = download(
-            loadJson("$toGet.json").imgUrl, "$toGet.png", "png"
-        )
-
-        downloadRefIdList[refIdImg] = toGet
-        imgRefIdList[refIdImg] = toGet
-        return false
     }
 
     private fun downloadFavourites(favouriteComicList: MutableList<Int>) {
@@ -390,7 +384,7 @@ class MainActivity : AppCompatActivity() {
             currentComicNumber = prefs.getInt("currentComicNumber", currentComicNumber)
 
             if(File(downloadLocation, "comicList.json").exists()){
-                comicList = comicList.union(loadList("comicList.json")).toMutableList()
+                comicList = comicList.union(loadList("comicList.json",downloadLocation)).toMutableList()
             }else{
                 Toast.makeText(
                     applicationContext,
@@ -401,7 +395,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             if(File(downloadLocation, "favouriteComicList.json").exists()){
-                favouriteComicList = favouriteComicList.union(loadList("favouriteComicList.json")).toMutableList()
+                favouriteComicList = favouriteComicList.union(loadList("favouriteComicList.json",downloadLocation)).toMutableList()
             }else{
                 Toast.makeText(
                     applicationContext,
@@ -438,15 +432,15 @@ class MainActivity : AppCompatActivity() {
         editor.putBoolean("initialized", true)
         editor.apply()
         Toast.makeText(applicationContext, "Preferences Saved", Toast.LENGTH_SHORT).show()
-        saveList(comicList, "comicList.json")
+        saveList(comicList, "comicList.json",downloadLocation)
         saveList(
             favouriteComicList,
-            "favouriteComicList.json"
+            "favouriteComicList.json",downloadLocation
         )
     }
 
     private fun updateComic(number: Int) {
-        if (legalNumber(number)) {
+        if ((firstComicNumber <= number) && (number <= latestComicNumber)) {
             val result = getComic(number)
             if (result) {
                 d("updateComic", "updating number: $number")
@@ -454,6 +448,8 @@ class MainActivity : AppCompatActivity() {
                 viewpager.currentItem = currentComicNumber
                 //viewpager.invalidate()
                 viewpager.postInvalidate()
+                viewpager.invalidate()
+                viewpager.adapter?.notifyDataSetChanged()
             }
             //else if (!result){
             //while (number in imgRefIdList.values){}
@@ -467,129 +463,5 @@ class MainActivity : AppCompatActivity() {
         d("updateComic", "latest: $latestComicNumber")
     }
 
-    /*
-    check if the number is to high or low
-    returns true if legal number,
-    false if not
-     */
-    private fun legalNumber(number: Int): Boolean {
-        return when ((firstComicNumber <= number) && (number <= latestComicNumber)) {
-            true -> true
-            false -> false
-        }
-    }
-
-    private fun download(url: String, filename: String, fileType: String): Long {
-        val downloadManagerVar =
-            getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val downloadUri = Uri.parse(url)
-        val request = DownloadManager.Request(downloadUri)
-        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-        request.setAllowedOverRoaming(false)
-        request.setTitle(resources.getString(R.string.comic_viewer_downloading_comic) + fileType)
-        request.setDescription(resources.getString(R.string.comic_viewer_downloading_comic) + fileType)
-        request.setDestinationInExternalFilesDir(
-            this,
-            DIRECTORY_DOWNLOADS,
-            filename
-        )
-        return downloadManagerVar.enqueue(request)
-    }
-
-    @Throws(IOException::class)
-    private fun saveList(comicList: List<Int>, filename: String) {
-        val text = comicList.toString()
-
-        var fos: FileOutputStream? = null
-        try {
-            fos = FileOutputStream(
-                File(
-                    downloadLocation,
-                    filename
-                )
-            )
-
-            //fos = context.openFileOutput(filename, MODE_PRIVATE)
-            fos.write(text.toByteArray())
-            fos.close()
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
-
-    @Throws(IOException::class)
-    private fun loadList(filename: String): MutableList<Int> {
-        var fis: FileInputStream? = null
-
-        try {
-            fis = FileInputStream(
-                File(
-                    downloadLocation,
-                    filename
-                )
-            )
-            val input = BufferedReader(InputStreamReader(fis)).readText()
-            val initialInput = input.removeSurrounding("[", "]")
-            if (initialInput.isEmpty()) {
-                return mutableListOf()
-            }
-
-            return initialInput.split(",").map { it.trim() }.map { it.toInt() }.toMutableList()
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
-
-    @Throws(IOException::class)
-    private fun loadJson(filename: String): Comic {
-        val fis = FileInputStream(
-            File(
-                downloadLocation,
-                filename
-            )
-        )
-
-        val reader = JsonReader(InputStreamReader(fis, "UTF-8"))
-        reader.use {
-            var number = -2 // want it to be a number not used, and that is nonsense.
-            var title = ""
-            var altText = ""
-            var urlPath = ""
-            var year = -1
-            var month = -1
-            var day = -1
-
-            reader.beginObject()
-            while (reader.hasNext()) {
-                when (reader.nextName().toString()) {
-                    "img" -> urlPath = reader.nextString()
-                    "alt" -> altText = reader.nextString()
-                    "num" -> number = reader.nextInt()
-                    "title" -> title = reader.nextString()
-                    "year" -> year = reader.nextInt()
-                    "month" -> month = reader.nextInt()
-                    "day" -> day = reader.nextInt()
-                    else -> reader.skipValue()
-                }
-            }
-
-            reader.endObject()
-            reader.close()
-            return Comic(number, title, altText, urlPath, "",year,month,day)
-
-        }
-    }
 }
 

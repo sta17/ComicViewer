@@ -36,13 +36,17 @@ class ViewPagerAdapter(
     private var jsonRefIdList: MutableMap<Long, Int>
 ) : PagerAdapter() {
 
-    private var layoutInflater : LayoutInflater? = null;
-    private var showComicNumber = false;
+    private var layoutInflater : LayoutInflater? = null
+    private var showComicNumber = false
     private lateinit var currentView: View
+    private lateinit var currentViewGroup: ViewGroup
 
+    override fun getItemPosition(`object`: Any): Int {
+        return PagerAdapter.POSITION_NONE
+    }
 
-    fun getCurrentView(): View {
-        return currentView;
+    fun getCurrentViewGroup(): ViewGroup{
+        return currentViewGroup
     }
 
     override fun isViewFromObject(view: View, `object`: Any): Boolean {
@@ -57,7 +61,6 @@ class ViewPagerAdapter(
     override fun instantiateItem(container: ViewGroup, position: Int): Any { // merge with update comic.
         layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         var v = layoutInflater!!.inflate(R.layout.viewpage , null)
-        currentView = v
 
         val buttonTitle = v.findViewById(R.id.buttonTitle) as Button
 
@@ -71,6 +74,7 @@ class ViewPagerAdapter(
             }
         }
         v = updateComic(position,v)
+        currentView = v
         val vp = container as ViewPager
         vp.addView(v , 0)
 
@@ -101,7 +105,7 @@ class ViewPagerAdapter(
     /*
     update display and text
      */
-    private fun updateGraphics(position: Int, v:View): View {
+     fun updateGraphics(position: Int, v:View): View {
         val displayImage = v.findViewById<View>(R.id.displayImage) as ImageView
         val displayDescription = v.findViewById(R.id.displayDescription) as TextView
         val dateView = v.findViewById(R.id.dateView) as TextView
