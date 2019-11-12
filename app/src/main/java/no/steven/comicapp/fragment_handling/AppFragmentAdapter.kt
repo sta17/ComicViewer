@@ -17,8 +17,8 @@ class AppFragmentAdapter(fm: FragmentManager, var mContext: Context,private val 
         return count
     }
 
-    fun changeNumber(newNumber: Int) {
-        count = newNumber
+    fun setCount(newCount: Int) {
+        count = newCount
     }
 
     override fun getItem(position: Int): Fragment {

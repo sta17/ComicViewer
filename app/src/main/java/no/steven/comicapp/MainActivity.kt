@@ -14,13 +14,14 @@ import android.os.Environment
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.text.InputType.TYPE_CLASS_NUMBER
 import android.util.JsonReader
+import android.util.Log
 import android.util.Log.d
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.viewpager.widget.ViewPager
-import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.fragment_manager.*
 import java.io.*
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import no.steven.comicapp.fragment_handling.ManagerFragment
@@ -56,6 +57,8 @@ class MainActivity : AppCompatActivity() {
     private var jsonRefIdList: MutableMap<Long, Int> = mutableMapOf()
 
     private var sharedPrefs = "Steven's a Comic App"
+
+    private val TAG = "MainActivity"
 
     private lateinit var downloadLocation: File
 
@@ -110,24 +113,7 @@ class MainActivity : AppCompatActivity() {
         viewpager = findViewById(R.id.viewpager)
 
         mManagerFragment = ManagerFragment.newInstance(downloadLocation,currentComicNumber)
-
-        viewpager.addOnPageChangeListener(object : OnPageChangeListener {
-            override fun onPageScrollStateChanged(state: Int) {}
-            override fun onPageScrolled(
-                position: Int,
-                positionOffset: Float,
-                positionOffsetPixels: Int
-            ) {
-                // https://developer.android.com/reference/androidx/viewpager/widget/ViewPager.OnPageChangeListener.html
-                // https://stackoverflow.com/questions/11293300/determine-when-a-viewpager-changes-pages
-                // https://stackoverflow.com/questions/8117523/how-do-you-get-the-current-page-number-of-a-viewpager-for-android
-                // TODO: Start here figure out change.
-            }
-
-            override fun onPageSelected(position: Int) {
-                // Check if this is the page you want.
-            }
-        })
+        replaceFragment()
 
         buttonFirst.setOnClickListener {
             updateComic(1)
@@ -445,11 +431,10 @@ class MainActivity : AppCompatActivity() {
             if (result) {
                 d("updateComic", "updating number: $number")
                 currentComicNumber = number
-                viewpager.currentItem = currentComicNumber
-                //viewpager.invalidate()
-                viewpager.postInvalidate()
-                viewpager.invalidate()
-                viewpager.adapter?.notifyDataSetChanged()
+
+                mManagerFragment = ManagerFragment.newInstance(downloadLocation,currentComicNumber)
+                replaceFragment()
+
             }
             //else if (!result){
             //while (number in imgRefIdList.values){}
@@ -461,6 +446,19 @@ class MainActivity : AppCompatActivity() {
         d("updateComic", "comicList: $comicList")
         d("updateComic", "favouriteComicList: $favouriteComicList")
         d("updateComic", "latest: $latestComicNumber")
+    }
+
+    private fun replaceFragment() {
+        try {
+
+            val fragmentManager = supportFragmentManager
+            fragmentManager.beginTransaction().replace(R.id.content_main, mManagerFragment, "tag")
+                .commit()
+
+        } catch (e: Exception) {
+            Log.d(TAG, e.toString())
+        }
+
     }
 
 }
