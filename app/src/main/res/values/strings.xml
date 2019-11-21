@@ -1,10 +1,8 @@
 <resources>
     <string name="app_name">A Comic App</string>
-    <string name="next">Next</string>
     <string name="favourite">Favourite</string>
     <string name="last">Latest</string>
     <string name="first">First</string>
-    <string name="previous">Previous</string>
     <string name="comic_image">Comic Image</string>
     <string name="description">Description</string>
     <string name="title">Title</string>
@@ -12,7 +10,6 @@
     <string name="comic_not_found">Comic Not Found</string>
     <string name="preferences_loaded">Preferences Loaded</string>
     <string name="new_app_set_up">New App Set up</string>
-    <string name="comic_viewer_downloading_comic">Comic Viewer Downloading comic</string>
     <string name="search">Search</string>
     <string name="credits">Credits</string>
     <string name="date">Date:</string>

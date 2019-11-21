@@ -1,14 +1,10 @@
 package no.steven.comicapp
 
 import android.annotation.SuppressLint
-import android.app.DownloadManager
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.BitmapFactory
-import android.net.Uri
-import android.os.Environment
 import android.text.SpannableStringBuilder
-import android.util.JsonReader
 import android.util.Log
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
@@ -22,7 +18,6 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.core.text.bold
 import java.io.File
 import java.io.FileInputStream
-import java.io.InputStreamReader
 
 class ViewPagerAdapter(
     private val context: Context,
@@ -36,13 +31,13 @@ class ViewPagerAdapter(
     private var jsonRefIdList: MutableMap<Long, Int>
 ) : PagerAdapter() {
 
-    private var layoutInflater : LayoutInflater? = null;
-    private var showComicNumber = false;
+    private var layoutInflater : LayoutInflater? = null
+    private var showComicNumber = false
     private lateinit var currentView: View
 
 
     fun getCurrentView(): View {
-        return currentView;
+        return currentView
     }
 
     override fun isViewFromObject(view: View, `object`: Any): Boolean {
@@ -50,7 +45,7 @@ class ViewPagerAdapter(
     }
 
     override fun getCount(): Int {
-       return latestComicNumber // get size, should be maybe either size of the items in comiclist or the latest number, look into.
+       return latestComicNumber // get size, should be maybe either size of the items in comic list or the latest number, look into.
     }
 
     @SuppressLint("InflateParams")
@@ -84,8 +79,8 @@ class ViewPagerAdapter(
     }
 
     private fun updateComic(number: Int, v: View): View? {
-        if (legalNumber(number)) {
-            val result = getComic(number)
+        if (legalNumber(number,firstComicNumber,latestComicNumber)) {
+            val result = getComic(number,comicList,downloadLocation,downloadRefIdList,jsonRefIdList,imgRefIdList,context,firstComicNumber,latestComicNumber)
             if (result) {
                 Log.d("updateComic", "updating number: $number")
                 updateGraphics(number,v)
@@ -101,6 +96,7 @@ class ViewPagerAdapter(
     /*
     update display and text
      */
+    @SuppressLint("SetTextI18n")
     private fun updateGraphics(position: Int, v:View): View {
         val displayImage = v.findViewById<View>(R.id.photo_view) as ImageView
         val displayDescription = v.findViewById(R.id.displayDescription) as TextView
@@ -108,7 +104,7 @@ class ViewPagerAdapter(
         val buttonTitle = v.findViewById(R.id.buttonTitle) as Button
 
         if (File(downloadLocation, "$position.json").exists()) {
-            val comic: Comic = loadJson("$position.json")
+            val comic: Comic = loadJson("$position.json",downloadLocation)
 
             displayDescription.text = comic.altText
             buttonTitle.text = comic.title
@@ -142,131 +138,6 @@ class ViewPagerAdapter(
         }
         //this.invalidateOptionsMenu() //this is for updating the favourite, drop for now. implement later.
         return v
-    }
-
-    /*
-    Get the wanted Json file
-     */
-    private fun loadJson(filename: String): Comic {
-        val fis = FileInputStream(
-            File(
-                downloadLocation,
-                filename
-            )
-        )
-
-        val reader = JsonReader(InputStreamReader(fis, "UTF-8"))
-        reader.use {
-            var number = -2 // want it to be a number not used, and that is nonsense.
-            var title = ""
-            var altText = ""
-            var urlPath = ""
-            var year = -1
-            var month = -1
-            var day = -1
-
-            reader.beginObject()
-            while (reader.hasNext()) {
-                when (reader.nextName().toString()) {
-                    "img" -> urlPath = reader.nextString()
-                    "alt" -> altText = reader.nextString()
-                    "num" -> number = reader.nextInt()
-                    "title" -> title = reader.nextString()
-                    "year" -> year = reader.nextInt()
-                    "month" -> month = reader.nextInt()
-                    "day" -> day = reader.nextInt()
-                    else -> reader.skipValue()
-                }
-            }
-
-            reader.endObject()
-            reader.close()
-            return Comic(number, title, altText, urlPath, "",year,month,day)
-
-        }
-    }
-
-    private fun getComic(toGet: Int): Boolean {
-        // Check if in list already:
-        return when ((toGet in comicList) && legalNumber(toGet)) {
-            true -> true
-            false -> return when (toGet == 0 || toGet == -1) {
-                true -> downloadLatest(toGet)
-                false -> return when ((toGet in comicList) && legalNumber(toGet)) {
-                    true -> true
-                    false -> return when (!File(downloadLocation, "$toGet.json").exists()) {
-                        true -> downloadJson(toGet)
-                        false -> return when (!File(
-                            downloadLocation,
-                            "$toGet.png"
-                        ).exists()) {
-                            false -> downloadImage(toGet)
-                            true -> comicList.add(toGet)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun downloadLatest(toGet: Int): Boolean {
-        val latest = File(
-            downloadLocation,
-            "latest.json"
-        )
-        latest.absoluteFile.delete()
-        if (latest.exists()){
-            latest.absoluteFile.delete()
-        }
-
-        val refIdJson = download("https://xkcd.com/info.0.json", "latest.json", "txt")
-
-        downloadRefIdList[refIdJson] = toGet
-        jsonRefIdList[refIdJson] = toGet
-
-        return false
-    }
-
-    private fun downloadJson(toGet: Int): Boolean {
-        val refIdJson = download("https://xkcd.com/$toGet/info.0.json", "$toGet.json", "txt")
-
-        downloadRefIdList[refIdJson] = toGet
-        jsonRefIdList[refIdJson] = toGet
-        return false
-    }
-
-    private fun downloadImage(toGet: Int): Boolean {
-        val refIdImg = download(
-            loadJson("$toGet.json").imgUrl, "$toGet.png", "png"
-        )
-
-        downloadRefIdList[refIdImg] = toGet
-        imgRefIdList[refIdImg] = toGet
-        return false
-    }
-
-    private fun download(url: String, filename: String, fileType: String): Long {
-        val downloadManagerVar = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val downloadUri = Uri.parse(url)
-        val request = DownloadManager.Request(downloadUri)
-        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-        request.setAllowedOverRoaming(false)
-        request.setTitle(resources.getString(R.string.comic_viewer_downloading_comic) + fileType)
-        request.setDescription(resources.getString(R.string.comic_viewer_downloading_comic) + fileType)
-        request.setDestinationInExternalFilesDir(
-            context,
-            Environment.DIRECTORY_DOWNLOADS,
-            filename
-        )
-        return downloadManagerVar.enqueue(request)
-    }
-
-
-    private fun legalNumber(number: Int): Boolean {
-        return when ((firstComicNumber <= number) && (number <= latestComicNumber)) {
-            true -> true
-            false -> false
-        }
     }
 
 }
