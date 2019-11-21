@@ -37,6 +37,7 @@ import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 // https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html - Comic Icon
 // http://romannurik.github.io/AndroidAssetStudio/ - Asset generators
 // https://github.com/chrisbanes/PhotoView
+// https://github.com/square/picasso
 //TODO: make most of the comic pages cleanable as junk except for favourites.
 //TODO: set the page update to happen upon comic image download, immediately, rather then second button push.
 //BUG: update image on button click. Handle download done, update now and clean download handling code.
