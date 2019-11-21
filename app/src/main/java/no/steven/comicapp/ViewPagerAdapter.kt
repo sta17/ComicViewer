@@ -102,7 +102,7 @@ class ViewPagerAdapter(
     update display and text
      */
     private fun updateGraphics(position: Int, v:View): View {
-        val displayImage = v.findViewById<View>(R.id.displayImage) as ImageView
+        val displayImage = v.findViewById<View>(R.id.photo_view) as ImageView
         val displayDescription = v.findViewById(R.id.displayDescription) as TextView
         val dateView = v.findViewById(R.id.dateView) as TextView
         val buttonTitle = v.findViewById(R.id.buttonTitle) as Button

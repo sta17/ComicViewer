@@ -196,6 +196,7 @@ class MainActivity : AppCompatActivity() {
                             + System.getProperty("line.separator") + System.getProperty("line.separator") + "Magnifying glass/Search button designed by Freepik from Flaticon "
                             + System.getProperty("line.separator") + System.getProperty("line.separator") + "Star/Favourite button designed by smashicons from Flaticon"
                             + System.getProperty("line.separator") + System.getProperty("line.separator") + "App Icon made using romannurik.github.io/AndroidAssetStudio/"
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "Zoom feature made using github.com/chrisbanes/PhotoView library."
                             + System.getProperty("line.separator") + System.getProperty("line.separator") + "App by Steven Aanetsen"
                 )
                 .setIcon(R.mipmap.ic_launcher)

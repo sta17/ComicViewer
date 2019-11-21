@@ -1,60 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <LinearLayout
+                android:id="@+id/comicDisplay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/buttonBox">
 
-    <Button
-            android:id="@+id/buttonTitle"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start|top|end"
-            android:layout_marginStart="0dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginEnd="0dp"
-            android:gravity="center"
-            android:text="@string/title"
-            android:textSize="24sp" />
+            <Button
+                    android:id="@+id/buttonTitle"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|top|end"
+                    android:gravity="center"
+                    android:text="@string/title"
+                    android:textSize="24sp" />
 
-    <ImageView
-            android:id="@+id/displayImage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|start|center_horizontal|fill_horizontal|end"
-            android:layout_marginStart="0dp"
-            android:layout_marginLeft="0dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginRight="0dp"
-            android:layout_marginBottom="0dp"
-            android:contentDescription="@string/comic_image" />
+            <com.github.chrisbanes.photoview.PhotoView
+                    android:id="@+id/photo_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@string/comic_image"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_launcher_foreground" />
 
-    <TextView
-            android:id="@+id/displayDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="0dp"
-            android:layout_marginLeft="0dp"
-            android:layout_marginEnd="0dp"
-            android:layout_marginRight="0dp"
-            android:layout_marginBottom="0dp"
-            android:gravity="center|top"
-            android:text="@string/description"
-            android:textAllCaps="false"
-            android:textColor="@android:color/black"
-            android:textSize="18sp" />
+            <TextView
+                    android:id="@+id/displayDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|start|end"
+                    android:gravity="center|top"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:text="@string/description"
+                    android:textAllCaps="false"
+                    android:textSize="18sp" />
 
-    <TextView
-            android:id="@+id/dateView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="0dp"
-            android:layout_marginEnd="0dp"
-            android:layout_marginBottom="0dp"
-            android:gravity="center"
-            android:text="@string/date"
-            android:textAllCaps="false"
-            android:textStyle="bold" />
+            <TextView
+                    android:id="@+id/dateView"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:paddingBottom="10dp"
+                    android:text="@string/date"
+                    android:textAllCaps="false"
+                    android:textStyle="bold" />
 
-</LinearLayout>
+        </LinearLayout>
+
+</ScrollView>
