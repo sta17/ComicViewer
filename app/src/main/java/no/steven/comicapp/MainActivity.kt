@@ -8,12 +8,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.text.InputType.TYPE_CLASS_NUMBER
-import android.util.JsonReader
 import android.util.Log
 import android.util.Log.d
 import android.view.*
@@ -23,8 +21,7 @@ import androidx.core.app.ActivityCompat
 import androidx.viewpager.widget.ViewPager
 import kotlinx.android.synthetic.main.fragment_manager.*
 import java.io.*
-import androidx.viewpager.widget.ViewPager.OnPageChangeListener
-import no.steven.comicapp.fragment_handling.ManagerFragment
+import no.steven.comicapp.fragment_handling_old.ManagerFragment
 
 
 // https://github.com/shortcut/android-coding-assignment - task.

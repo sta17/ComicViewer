@@ -1,4 +1,4 @@
-package no.steven.comicapp.fragment_handling
+package no.steven.comicapp.fragment_handling_old
 
 import android.content.Context
 import androidx.fragment.app.Fragment
@@ -11,7 +11,7 @@ class AppFragmentAdapter(fm: FragmentManager, var mContext: Context,private val 
 
     private var count = 3
     private var mNumber: Int = -10
-    private var showComicNumber = false
+    private var mShowComicNumber = false
 
     override fun getCount(): Int {
         return count
@@ -31,13 +31,14 @@ class AppFragmentAdapter(fm: FragmentManager, var mContext: Context,private val 
         showComicNumber: Boolean
     ) {
         mNumber = number
+        mShowComicNumber = showComicNumber
         //updated
         notifyDataSetChanged()
     }
 
     override fun getItemPosition(`object`: Any): Int {
         if (`object` is UpdateableFragmentListener) {
-            `object`.update(mNumber,showComicNumber)
+            `object`.update(mNumber,mShowComicNumber)
         }
         return super.getItemPosition(`object`)
     }

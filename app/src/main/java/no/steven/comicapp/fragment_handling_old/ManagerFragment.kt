@@ -1,4 +1,4 @@
-package no.steven.comicapp.fragment_handling
+package no.steven.comicapp.fragment_handling_old
 
 import android.os.Bundle
 import android.view.View
@@ -32,7 +32,6 @@ class ManagerFragment(private val downloadLocation: File, private val currentCom
     }
 
     companion object {
-
         fun newInstance(downloadLocation: File, currentComicNumber: Int): ManagerFragment {
             return ManagerFragment(downloadLocation,currentComicNumber)
         }

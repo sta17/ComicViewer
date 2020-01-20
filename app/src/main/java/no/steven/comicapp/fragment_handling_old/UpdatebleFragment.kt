@@ -1,4 +1,4 @@
-package no.steven.comicapp.fragment_handling
+package no.steven.comicapp.fragment_handling_old
 
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -20,10 +20,10 @@ import java.io.FileInputStream
 
 class UpdatableFragment(private val downloadLocation: File) : Fragment(),
     UpdateableFragmentListener {
-    private lateinit var mDescription: TextView
-    private lateinit var mTitle: Button
-    private lateinit var mImage: ImageView
-    private lateinit var mDate: TextView
+     private lateinit var mDescription: TextView
+     private lateinit var mTitle: Button
+     private lateinit var mImage: ImageView
+     private lateinit var mDate: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
