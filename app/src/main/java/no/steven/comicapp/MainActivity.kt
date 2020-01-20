@@ -9,8 +9,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -21,14 +19,10 @@ import android.util.JsonReader
 import android.util.Log.d
 import android.view.Menu
 import android.view.MenuItem
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.text.bold
 import com.github.chrisbanes.photoview.PhotoView
 import com.github.chrisbanes.photoview.PhotoViewAttacher
@@ -55,6 +49,7 @@ class MainActivity : AppCompatActivity() {
     private var currentComicNumber = 0
     private var latestComicNumber = 0
     private var firstComicNumber = 1
+    private var changeToComicNumber = 0
 
     private var comicList = mutableListOf<Int>()
     private var favouriteComicList = mutableListOf<Int>()
@@ -214,6 +209,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // on download complete handling.
     private var onComplete: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctxt: Context, intent: Intent) {
             // get the RefId from the download manager
@@ -236,6 +232,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // if latest download is latest comic.
     private fun handleLatest(state: Int): Boolean {
         val downloadedComic =
             loadJson("latest.json")
@@ -271,6 +268,7 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    //if latest download is a json file.
     private fun handleJson(toGet: Int, referenceId: Long): Boolean {
         val downloadedComic = loadJson("$toGet.json")
 
@@ -289,12 +287,19 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    //if latest download is image.
     private fun handleImage(referenceId: Long): Boolean {
         val toGet: Int = imgRefIdList[referenceId]!!
 
         imgRefIdList.remove(referenceId)
         downloadRefIdList.remove(referenceId)
         comicList.add(toGet)
+
+        if(toGet == changeToComicNumber) {
+            currentComicNumber = changeToComicNumber
+            updateGraphics(changeToComicNumber)
+            changeToComicNumber = 0
+        }
 
         return true
     }
@@ -448,14 +453,11 @@ class MainActivity : AppCompatActivity() {
             val result = getComic(number)
             if (result) {
                 d("updateComic", "updating number: $number")
+                updateGraphics(number)
                 currentComicNumber = number
-                updateGraphics(currentComicNumber)
+            } else {
+                changeToComicNumber = number
             }
-            //else if (!result){
-            //while (number in imgRefIdList.values){}
-            //    currentComicNumber = waitingToUpdateTo
-            //    updateGraphics(currentComicNumber)
-            //}
         }
         d("updateComic", "number: $number")
         d("updateComic", "comicList: $comicList")
@@ -525,6 +527,7 @@ class MainActivity : AppCompatActivity() {
         return downloadManagerVar.enqueue(request)
     }
 
+    //list saving.
     @Throws(IOException::class)
     private fun saveList(comicList: List<Int>, filename: String) {
         val text = comicList.toString()
@@ -552,6 +555,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //loads a list.
     @Throws(IOException::class)
     private fun loadList(filename: String): MutableList<Int> {
         var fis: FileInputStream? = null
@@ -581,6 +585,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // loads json as text file.
     @Throws(IOException::class)
     private fun loadJson(filename: String): Comic {
         val fis = FileInputStream(
