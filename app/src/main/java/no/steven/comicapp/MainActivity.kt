@@ -390,12 +390,9 @@ class MainActivity : AppCompatActivity() {
                 viewpager.currentItem = currentComicNumber
                 //viewpager.invalidate()
                 viewpager.postInvalidate()
+            } else {
+
             }
-            //else if (!result){
-            //while (number in imgRefIdList.values){}
-            //    currentComicNumber = waitingToUpdateTo
-            //    updateGraphics(currentComicNumber)
-            //}
         }
         d("updateComic", "number: $number")
         d("updateComic", "comicList: $comicList")
