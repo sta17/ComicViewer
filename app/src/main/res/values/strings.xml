@@ -11,9 +11,24 @@
     <string name="unknown">Unknown</string>
     <string name="comic_not_found">Comic Not Found</string>
     <string name="preferences_loaded">Preferences Loaded</string>
+    <string name="preferences_saved">Preferences Saved</string>
     <string name="new_app_set_up">New App Set up</string>
     <string name="comic_viewer_downloading_comic">Comic Viewer Downloading comic</string>
     <string name="search">Search</string>
     <string name="credits">Credits</string>
+    <string name="creditsxkcd">xkcd by Randall Munroe at xkcd.com</string>
+    <string name="creditssearchbutton">Magnifying glass/Search button designed by Freepik from www.Flaticon.com</string>
+    <string name="creditsfavouritebutton">Star/Favourite button designed by smashicons from www.Flaticon.com</string>
+    <string name="creditszoom">Zoom feature made using github.com/chrisbanes/PhotoView library.</string>
+    <string name="creditsbyme">App by Steven Aanetsen.</string>
     <string name="date">Date:</string>
+    <string name="comicsnotfound">Comiclist not found. No Comics in list.</string>
+    <string name="favouritesnotfound">Favouritelist not found. No Favourites in list.</string>
+    <string name="back">Back</string>
+    <string name="favouriteremoved">Favourite Removed</string>
+    <string name="favouriteadded">Favourite Added</string>
+    <string name="go">Go</string>
+    <string name="cancel">Cancel</string>
+    <string name="comicretrieval">Comic Retrieval</string>
+    <string name="inputnumber">Please Input desired comic number:</string>
 </resources>

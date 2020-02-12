@@ -25,7 +25,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.text.bold
 import com.github.chrisbanes.photoview.PhotoView
-import com.github.chrisbanes.photoview.PhotoViewAttacher
 import kotlinx.android.synthetic.main.content_main.*
 import java.io.*
 
@@ -162,13 +161,13 @@ class MainActivity : AppCompatActivity() {
             val input = EditText(this)
             input.inputType = TYPE_CLASS_NUMBER
 
-            dDialog.setTitle("Comic Retrieval")
-                .setMessage("Please Input desired comic number")
+            dDialog.setTitle(resources.getString(R.string.comicretrieval))
+                .setMessage(resources.getString(R.string.inputnumber))
                 .setIcon(R.drawable.transparency)
                 .setCancelable(true)
                 .setView(input)
-                .setPositiveButton("Go") { _, _ -> updateComic(input.text.toString().toInt()) }
-                .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+                .setPositiveButton(resources.getString(R.string.go)) { _, _ -> updateComic(input.text.toString().toInt()) }
+                .setNegativeButton(resources.getString(R.string.cancel)) { dialog, _ -> dialog.cancel() }
                 .create()
                 .show()
             true
@@ -176,28 +175,27 @@ class MainActivity : AppCompatActivity() {
         R.id.action_favourite -> {
             if (currentComicNumber in favouriteComicList) {
                 favouriteComicList.remove(currentComicNumber)
-                Toast.makeText(applicationContext, "Favourite Removed", Toast.LENGTH_LONG).show()
+                Toast.makeText(applicationContext, resources.getString(R.string.favouriteremoved), Toast.LENGTH_LONG).show()
             } else {
                 favouriteComicList.add(currentComicNumber)
-                Toast.makeText(applicationContext, "Favourite Added", Toast.LENGTH_LONG).show()
+                Toast.makeText(applicationContext, resources.getString(R.string.favouriteadded), Toast.LENGTH_LONG).show()
             }
             this.invalidateOptionsMenu()
             true
         }
         R.id.action_credits -> {
             val dDialog = AlertDialog.Builder(this, R.style.AppTheme_DialogTheme)
-                .setTitle("Credits")
+                .setTitle(resources.getString(R.string.credits))
                 .setMessage(
-                    "xkcd by Randall Munroe at xkcd.com"
-                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "Magnifying glass/Search button designed by Freepik from Flaticon."
-                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "Star/Favourite button designed by smashicons from Flaticon."
-                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "App Icon made using romannurik.github.io/AndroidAssetStudio/"
-                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "Zoom feature made using github.com/chrisbanes/PhotoView library."
-                            + System.getProperty("line.separator") + System.getProperty("line.separator") + "App by Steven Aanetsen."
+                    resources.getString(R.string.creditsxkcd)
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + resources.getString(R.string.creditssearchbutton)
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + resources.getString(R.string.creditsfavouritebutton)
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + resources.getString(R.string.creditszoom)
+                            + System.getProperty("line.separator") + System.getProperty("line.separator") + resources.getString(R.string.creditsbyme)
                 )
                 .setIcon(R.mipmap.ic_launcher)
                 .setCancelable(true)
-                .setNegativeButton("Back") { dialog, _ -> dialog.cancel() }
+                .setNegativeButton(resources.getString(R.string.back)) { dialog, _ -> dialog.cancel() }
                 .create()
             dDialog.show()
             true
@@ -397,7 +395,7 @@ class MainActivity : AppCompatActivity() {
             }else{
                 Toast.makeText(
                     applicationContext,
-                    "Comic list not found. No Comics in list.",
+                    resources.getString(R.string.comicsnotfound),
                     Toast.LENGTH_LONG
                 ).show()
                 d("error","ComicList file was not found.")
@@ -408,7 +406,7 @@ class MainActivity : AppCompatActivity() {
             }else{
                 Toast.makeText(
                     applicationContext,
-                    "Favourite Comic list not found. No Comics in list.",
+                    resources.getString(R.string.favouritesnotfound),
                     Toast.LENGTH_LONG
                 ).show()
                 d("error","ComicList file was not found.")
@@ -440,7 +438,7 @@ class MainActivity : AppCompatActivity() {
         editor.putInt("currentComicNumber", currentComicNumber)
         editor.putBoolean("initialized", true)
         editor.apply()
-        Toast.makeText(applicationContext, "Preferences Saved", Toast.LENGTH_SHORT).show()
+        Toast.makeText(applicationContext, resources.getString(R.string.preferences_saved), Toast.LENGTH_SHORT).show()
         saveList(comicList, "comicList.json")
         saveList(
             favouriteComicList,
